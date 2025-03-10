@@ -1,0 +1,26 @@
+{
+  "name": "personal-website-threejs",
+  "version": "1.0.0",
+  "description": "Personal website using Three.js",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "keywords": [
+    "three.js",
+    "3D",
+    "portfolio",
+    "personal-website"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "three": "^0.160.0",
+    "gsap": "^3.12.4"
+  },
+  "devDependencies": {
+    "vite": "^5.0.10"
+  }
+} 

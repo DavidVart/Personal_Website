@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>David Vargas | Interactive Portfolio</title>
+    <link rel="stylesheet" href="./src/styles/main.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <canvas class="webgl"></canvas>
+    
+    <div class="loading-bar"></div>
+    
+    <div class="content">
+        <header>
+            <h1 class="title">David Vargas</h1>
+            <nav>
+                <ul>
+                    <li><a href="#about">About</a></li>
+                    <li><a href="#experience">Experience</a></li>
+                    <li><a href="#skills">Skills</a></li>
+                    <li><a href="#projects">Projects</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+            </nav>
+        </header>
+        
+        <section id="about" class="section">
+            <div class="section-content">
+                <h2>About Me</h2>
+                <p class="tagline">Software Developer & Creative Technologist</p>
+                <p>Welcome to my interactive 3D portfolio. I'm David Vargas, a passionate developer with expertise in creating immersive digital experiences. I blend technical skills with creative vision to build innovative solutions.</p>
+                <p>Explore my portfolio by navigating through the sections and interacting with the 3D elements. Click on objects to reveal more information about my experience, skills, and projects.</p>
+                <div class="cta-container">
+                    <a href="#experience" class="cta-button">View Experience</a>
+                    <a href="#contact" class="cta-button secondary">Contact Me</a>
+                </div>
+            </div>
+        </section>
+        
+        <section id="experience" class="section">
+            <div class="section-content">
+                <h2>Experience</h2>
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <h3>Senior Software Developer</h3>
+                            <h4>Tech Innovations Inc.</h4>
+                            <p class="timeline-date">2020 - Present</p>
+                            <p>Leading development of web applications using modern JavaScript frameworks. Implementing 3D visualizations and interactive user experiences.</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <h3>Full Stack Developer</h3>
+                            <h4>Digital Solutions Group</h4>
+                            <p class="timeline-date">2017 - 2020</p>
+                            <p>Developed responsive web applications and RESTful APIs. Collaborated with design teams to implement interactive UI/UX features.</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <h3>Junior Web Developer</h3>
+                            <h4>Creative Web Agency</h4>
+                            <p class="timeline-date">2015 - 2017</p>
+                            <p>Built and maintained client websites. Implemented responsive designs and interactive elements using JavaScript and CSS.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="skills" class="section">
+            <div class="section-content">
+                <h2>Skills</h2>
+                <p>My technical skills and expertise visualized in 3D. Click on any skill to learn more about my proficiency and experience with it.</p>
+                <div class="skills-categories">
+                    <div class="skill-category">
+                        <h3>Frontend</h3>
+                        <ul>
+                            <li>JavaScript (ES6+)</li>
+                            <li>React.js</li>
+                            <li>Three.js</li>
+                            <li>HTML5/CSS3</li>
+                        </ul>
+                    </div>
+                    <div class="skill-category">
+                        <h3>Backend</h3>
+                        <ul>
+                            <li>Node.js</li>
+                            <li>Python</li>
+                            <li>SQL/NoSQL</li>
+                            <li>RESTful APIs</li>
+                        </ul>
+                    </div>
+                    <div class="skill-category">
+                        <h3>Tools & Others</h3>
+                        <ul>
+                            <li>Git/GitHub</li>
+                            <li>Docker</li>
+                            <li>AWS</li>
+                            <li>UI/UX Design</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="projects" class="section">
+            <div class="section-content">
+                <h2>Projects</h2>
+                <p>Explore my work by interacting with the 3D models. Click on any project to learn more about the technologies used and my role in its development.</p>
+                <div class="projects-info">
+                    <div class="project-details" id="project1-details">
+                        <h3>Interactive Data Visualization</h3>
+                        <p>A web application that transforms complex datasets into interactive 3D visualizations.</p>
+                        <p><strong>Technologies:</strong> Three.js, D3.js, React, Node.js</p>
+                        <a href="#" class="project-link">View Project</a>
+                    </div>
+                    <div class="project-details" id="project2-details">
+                        <h3>E-Commerce Platform</h3>
+                        <p>A full-featured online shopping platform with real-time inventory management.</p>
+                        <p><strong>Technologies:</strong> React, Redux, Express, MongoDB</p>
+                        <a href="#" class="project-link">View Project</a>
+                    </div>
+                    <div class="project-details" id="project3-details">
+                        <h3>AR Mobile Application</h3>
+                        <p>An augmented reality app that enhances user experience through interactive 3D elements.</p>
+                        <p><strong>Technologies:</strong> Unity, ARKit, C#, Firebase</p>
+                        <a href="#" class="project-link">View Project</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="contact" class="section">
+            <div class="section-content">
+                <h2>Contact</h2>
+                <p>Interested in working together? Feel free to reach out through any of the following channels:</p>
+                <div class="contact-info">
+                    <div class="contact-item">
+                        <h3>Email</h3>
+                        <a href="mailto:david.vargas@example.com">david.vargas@example.com</a>
+                    </div>
+                    <div class="contact-item">
+                        <h3>Social</h3>
+                        <div class="contact-links">
+                            <a href="https://github.com/davidvargas" target="_blank">GitHub</a>
+                            <a href="https://linkedin.com/in/davidvargas" target="_blank">LinkedIn</a>
+                            <a href="https://twitter.com/davidvargas" target="_blank">Twitter</a>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <h3>Location</h3>
+                        <p>San Francisco, CA</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <footer>
+            <p>&copy; 2023 David Vargas. All rights reserved.</p>
+        </footer>
+    </div>
+    
+    <script type="module" src="./src/main.js"></script>
+</body>
+</html> 
