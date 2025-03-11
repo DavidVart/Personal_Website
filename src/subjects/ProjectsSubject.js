@@ -33,7 +33,7 @@ export default class ProjectsSubject {
         this.project1 = new THREE.Mesh(project1Geometry, project1Material);
         this.project1.position.set(-3, 0, 0);
         this.project1.userData.id = 'project1';
-        this.project1.userData.title = 'Interactive Data Visualization';
+        this.project1.userData.title = 'Interactive Data Visualisation';
         this.project1.userData.description = 'A web application that transforms complex datasets into interactive 3D visualizations.';
         this.project1.userData.technologies = 'Three.js, D3.js, React, Node.js';
         this.scene.add(this.project1);
