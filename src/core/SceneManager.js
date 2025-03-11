@@ -169,8 +169,18 @@ export default class SceneManager {
             { x: 0, y: 0, z: 0 }          // Contact section
         ];
         
+        // Section IDs mapped to indices
+        const sectionIds = ['about', 'experience', 'skills', 'projects', 'contact'];
+        
         // Disable auto-rotation when focusing on a section
         this.controls.autoRotate = false;
+        
+        // Set the appropriate background for the current section
+        // Find the environment subject and update its background
+        const environmentSubject = this.subjects.find(subject => subject instanceof EnvironmentSubject);
+        if (environmentSubject && sectionIndex < sectionIds.length) {
+            environmentSubject.setActiveBackground(sectionIds[sectionIndex]);
+        }
         
         // Animate camera position
         if (sectionIndex < cameraPositions.length) {

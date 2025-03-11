@@ -4,14 +4,44 @@ import { gsap } from 'gsap';
 export default class EnvironmentSubject {
     constructor(scene) {
         this.scene = scene;
+        this.backgrounds = {};
+        this.currentBackground = null;
         this.init();
     }
     
     init() {
-        this.createStars();
-        this.createParticles();
-        this.createGrid();
-        this.createAmbientElements();
+        // Create all possible backgrounds
+        this.createStars(); // Common background elements
+        this.createParticles(); // Common background elements
+        this.createGrid(); // Common background elements
+        this.createAmbientElements(); // Default ambient elements
+        this.createRobotBackground(); // About Me section background
+        
+        // Initially hide the robot background
+        this.setActiveBackground('default');
+    }
+    
+    // Set which background should be visible based on section
+    setActiveBackground(sectionId) {
+        // Hide all backgrounds
+        if (this.backgrounds.robotBackground) {
+            this.backgrounds.robotBackground.visible = false;
+        }
+        if (this.backgrounds.ambientGroup) {
+            this.backgrounds.ambientGroup.visible = false;
+        }
+        
+        // Show the selected background
+        if (sectionId === 'about' && this.backgrounds.robotBackground) {
+            this.backgrounds.robotBackground.visible = true;
+            this.currentBackground = 'about';
+        } else {
+            // Default background
+            if (this.backgrounds.ambientGroup) {
+                this.backgrounds.ambientGroup.visible = true;
+            }
+            this.currentBackground = 'default';
+        }
     }
     
     createStars() {
@@ -180,6 +210,9 @@ export default class EnvironmentSubject {
         this.ambientGroup = new THREE.Group();
         this.scene.add(this.ambientGroup);
         
+        // Store the group in backgrounds object
+        this.backgrounds.ambientGroup = this.ambientGroup;
+        
         // Create a few floating geometric shapes
         const shapes = [
             new THREE.TorusGeometry(2, 0.5, 16, 50),
@@ -225,6 +258,189 @@ export default class EnvironmentSubject {
         });
     }
     
+    // New method to create robot-themed background
+    createRobotBackground() {
+        // Create a group for robot background elements
+        this.robotGroup = new THREE.Group();
+        this.scene.add(this.robotGroup);
+        
+        // Store the group in backgrounds object
+        this.backgrounds.robotBackground = this.robotGroup;
+        
+        // Create robot elements
+        this.createRobotFigures();
+        this.createCircuitPatterns();
+        this.createFloatingParts();
+    }
+    
+    // Create decorative robot figures
+    createRobotFigures() {
+        // Create 5 different robot silhouettes scattered around
+        const robotPositions = [
+            new THREE.Vector3(-8, 2, -10),
+            new THREE.Vector3(10, -1, -15),
+            new THREE.Vector3(5, 5, -12),
+            new THREE.Vector3(-5, -3, -8),
+            new THREE.Vector3(0, 8, -20)
+        ];
+        
+        robotPositions.forEach((position, index) => {
+            // Create robot body (simplified representation)
+            const bodyGeometry = new THREE.BoxGeometry(0.8, 1.2, 0.5);
+            const headGeometry = new THREE.SphereGeometry(0.4, 8, 8);
+            const armGeometry = new THREE.CylinderGeometry(0.15, 0.15, 0.8);
+            const legGeometry = new THREE.CylinderGeometry(0.2, 0.15, 1);
+            
+            // Create materials with different neon colors
+            const colors = [0x64ffda, 0xff61f6, 0x5eead4, 0xf471b5, 0xffffff];
+            const material = new THREE.MeshBasicMaterial({ 
+                color: colors[index % colors.length], 
+                wireframe: true,
+                transparent: true,
+                opacity: 0.5
+            });
+            
+            // Create robot parts
+            const body = new THREE.Mesh(bodyGeometry, material);
+            
+            const head = new THREE.Mesh(headGeometry, material);
+            head.position.y = 1;
+            
+            const leftArm = new THREE.Mesh(armGeometry, material);
+            leftArm.position.set(-0.6, 0.2, 0);
+            leftArm.rotation.z = Math.PI / 2;
+            
+            const rightArm = new THREE.Mesh(armGeometry, material);
+            rightArm.position.set(0.6, 0.2, 0);
+            rightArm.rotation.z = Math.PI / 2;
+            
+            const leftLeg = new THREE.Mesh(legGeometry, material);
+            leftLeg.position.set(-0.3, -1.1, 0);
+            
+            const rightLeg = new THREE.Mesh(legGeometry, material);
+            rightLeg.position.set(0.3, -1.1, 0);
+            
+            // Create robot group
+            const robot = new THREE.Group();
+            robot.add(body);
+            robot.add(head);
+            robot.add(leftArm);
+            robot.add(rightArm);
+            robot.add(leftLeg);
+            robot.add(rightLeg);
+            
+            // Position the robot
+            robot.position.copy(position);
+            
+            // Add slight random rotation
+            robot.rotation.y = Math.random() * Math.PI * 2;
+            
+            // Store initial position and rotation for animations
+            robot.userData.initialPosition = position.clone();
+            robot.userData.initialRotation = robot.rotation.clone();
+            
+            // Add robot to the group
+            this.robotGroup.add(robot);
+        });
+    }
+    
+    // Create circuit-like patterns in the background
+    createCircuitPatterns() {
+        // Create circuit board pattern in the background
+        const circuitMaterial = new THREE.LineBasicMaterial({
+            color: 0x64ffda,
+            transparent: true,
+            opacity: 0.3
+        });
+        
+        // Create several circuit patterns
+        for (let i = 0; i < 8; i++) {
+            const points = [];
+            const startX = (Math.random() - 0.5) * 20;
+            const startY = (Math.random() - 0.5) * 20;
+            const startZ = -20 - Math.random() * 10;
+            
+            points.push(new THREE.Vector3(startX, startY, startZ));
+            
+            // Create a random circuit path with sharp 90-degree turns
+            let currentX = startX;
+            let currentY = startY;
+            let currentZ = startZ;
+            
+            for (let j = 0; j < 5; j++) {
+                // Choose a random direction (0: X, 1: Y)
+                const direction = Math.floor(Math.random() * 2);
+                
+                // Random length segment
+                const length = 0.5 + Math.random() * 2;
+                
+                if (direction === 0) {
+                    // Move in X direction
+                    currentX += (Math.random() > 0.5 ? 1 : -1) * length;
+                } else {
+                    // Move in Y direction
+                    currentY += (Math.random() > 0.5 ? 1 : -1) * length;
+                }
+                
+                points.push(new THREE.Vector3(currentX, currentY, currentZ));
+            }
+            
+            const geometry = new THREE.BufferGeometry().setFromPoints(points);
+            const circuit = new THREE.Line(geometry, circuitMaterial);
+            
+            this.robotGroup.add(circuit);
+        }
+    }
+    
+    // Create floating mechanical parts
+    createFloatingParts() {
+        // Create various mechanical parts that float around
+        const partGeometries = [
+            new THREE.TorusGeometry(0.5, 0.2, 8, 16),    // Gear-like
+            new THREE.CylinderGeometry(0.2, 0.2, 0.8, 6), // Bolt
+            new THREE.BoxGeometry(0.4, 0.1, 0.6),        // Chip
+            new THREE.SphereGeometry(0.3, 4, 4),         // Angular sphere
+            new THREE.IcosahedronGeometry(0.4, 0)        // Angular shape
+        ];
+        
+        const partMaterials = [
+            new THREE.MeshBasicMaterial({ color: 0x64ffda, wireframe: true, transparent: true, opacity: 0.4 }),
+            new THREE.MeshBasicMaterial({ color: 0xff61f6, wireframe: true, transparent: true, opacity: 0.4 }),
+            new THREE.MeshBasicMaterial({ color: 0xffffff, wireframe: true, transparent: true, opacity: 0.3 })
+        ];
+        
+        // Create 15 random parts throughout the scene
+        for (let i = 0; i < 15; i++) {
+            const geometryIndex = Math.floor(Math.random() * partGeometries.length);
+            const materialIndex = Math.floor(Math.random() * partMaterials.length);
+            
+            const part = new THREE.Mesh(
+                partGeometries[geometryIndex],
+                partMaterials[materialIndex]
+            );
+            
+            // Position randomly
+            part.position.set(
+                (Math.random() - 0.5) * 30,
+                (Math.random() - 0.5) * 30,
+                -10 - Math.random() * 20
+            );
+            
+            // Random rotation
+            part.rotation.set(
+                Math.random() * Math.PI * 2,
+                Math.random() * Math.PI * 2,
+                Math.random() * Math.PI * 2
+            );
+            
+            // Store initial position and rotation for animations
+            part.userData.initialPosition = part.position.clone();
+            part.userData.initialRotation = part.rotation.clone();
+            
+            this.robotGroup.add(part);
+        }
+    }
+    
     startAnimations() {
         // Animate particles with subtle movement
         gsap.to(this.particles.rotation, {
@@ -256,6 +472,51 @@ export default class EnvironmentSubject {
                 });
             });
         }
+        
+        // Animate robot elements
+        if (this.robotGroup) {
+            // Animate robots
+            this.robotGroup.children.forEach((element, index) => {
+                if (element.type === 'Group') { // Robot figures
+                    // Floating animation
+                    gsap.to(element.position, {
+                        y: element.userData.initialPosition.y + 1 + Math.random(),
+                        duration: 4 + Math.random() * 4,
+                        repeat: -1,
+                        yoyo: true,
+                        ease: 'sine.inOut'
+                    });
+                    
+                    // Rotation animation
+                    gsap.to(element.rotation, {
+                        y: element.userData.initialRotation.y + Math.PI * 2,
+                        duration: 20 + Math.random() * 10,
+                        repeat: -1,
+                        ease: 'none'
+                    });
+                } else if (element.type === 'Mesh') { // Floating parts
+                    // Floating animation
+                    gsap.to(element.position, {
+                        x: element.userData.initialPosition.x + (Math.random() - 0.5) * 2,
+                        y: element.userData.initialPosition.y + (Math.random() - 0.5) * 2,
+                        duration: 3 + Math.random() * 5,
+                        repeat: -1,
+                        yoyo: true,
+                        ease: 'sine.inOut'
+                    });
+                    
+                    // Rotation animation
+                    gsap.to(element.rotation, {
+                        x: element.rotation.x + Math.PI * 2,
+                        y: element.rotation.y + Math.PI * 2,
+                        z: element.rotation.z + Math.PI * 2,
+                        duration: 10 + Math.random() * 15,
+                        repeat: -1,
+                        ease: 'none'
+                    });
+                }
+            });
+        }
     }
     
     update(time) {
@@ -273,6 +534,11 @@ export default class EnvironmentSubject {
         // Make particles move in a wave pattern
         if (this.particles) {
             this.particles.rotation.y = time * 0.05;
+        }
+        
+        // Additional animations for robot background if it's active
+        if (this.currentBackground === 'about' && this.robotGroup) {
+            this.robotGroup.rotation.y = Math.sin(time * 0.1) * 0.05;
         }
     }
 } 
