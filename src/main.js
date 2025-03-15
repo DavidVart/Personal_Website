@@ -98,9 +98,10 @@ function initNavigation() {
         
         sections.forEach(section => {
             const sectionTop = section.offsetTop;
-            const sectionHeight = section.clientHeight;
+            const sectionHeight = section.offsetHeight;
+            const scrollPosition = window.pageYOffset;
             
-            if (pageYOffset >= sectionTop - 200) {
+            if (scrollPosition >= sectionTop - 200) {
                 current = section.getAttribute('id');
             }
         });
@@ -112,6 +113,9 @@ function initNavigation() {
             }
         });
     });
+    
+    // Initialize neural network sphere
+    initNeuralSphere();
 }
 
 // Mobile menu functionality
@@ -699,50 +703,551 @@ function initInteractiveStats() {
 
 // Chatbot functionality
 function initChatbot() {
-    console.log('Initializing chatbot');
+    console.log('Initializing AI chatbot');
     
-    const chatbotToggle = document.querySelector('.chatbot-toggle');
+    const chatbotToggle = document.getElementById('chatbot-toggle');
+    const chatbotWindow = document.getElementById('chatbot-window');
+    const chatbotClose = document.getElementById('chatbot-close');
+    const chatbotMessages = document.getElementById('chatbot-messages');
+    const chatbotInput = document.getElementById('chatbot-input-field');
+    const chatbotSend = document.getElementById('chatbot-send');
+    const chatbotContext = document.getElementById('chatbot-context');
+    const chatbotSuggestions = document.getElementById('chatbot-suggestions');
+    const chatbotFace = document.querySelector('.chatbot-face');
     const chatbotContainer = document.querySelector('.chatbot-container');
-    const chatbotClose = document.querySelector('.chatbot-close');
-    const chatbotMessages = document.querySelector('.chatbot-messages');
-    const chatbotInput = document.querySelector('.chatbot-input input');
-    const chatbotSend = document.querySelector('.chatbot-send');
     
-    if (!chatbotToggle || !chatbotContainer || !chatbotClose || !chatbotMessages || !chatbotInput || !chatbotSend) {
+    if (!chatbotToggle || !chatbotWindow || !chatbotMessages || !chatbotInput || !chatbotSend || !chatbotContainer) {
         console.error('Chatbot elements not found');
         return;
     }
     
-    // Toggle chatbot
-    chatbotToggle.addEventListener('click', () => {
-        chatbotContainer.classList.toggle('active');
+    // Face and chatbot following mouse functionality
+    let isInHeroSection = true;
+    let lastMouseX = 0;
+    let lastMouseY = 0;
+    let targetX = 30; // Default position (right: 30px)
+    let targetY = 30; // Default position (bottom: 30px)
+    let currentX = 30;
+    let currentY = 30;
+    let isMoving = false;
+    let lastMoveTime = 0;
+    let moveTimeout;
+    let expressionTimeout;
+    let lastExpression = Date.now();
+    let velocity = { x: 0, y: 0 }; // For dragging effect
+    let lastFunFactTime = 0;
+    
+    // Store original position
+    const originalRight = 30;
+    const originalBottom = 30;
+    
+    // Set max movement range (px from original position)
+    const maxRangeX = 100;
+    const maxRangeY = 80;
+
+    // Fun facts about the profile
+    const funFacts = [
+        "Did you know David built a quadruped robot?",
+        "David is fluent in Python, JavaScript, and C++!",
+        "David has experience in AI and machine learning!",
+        "David worked as a Lead Software Developer at Jobsi!",
+        "David is studying Computer Science & AI at IE University!",
+        "David has leadership experience through Taglit Excel!",
+        "David loves combining robotics with software development!",
+        "David has worked on data visualization tools!",
+        "Click me to chat with David's AI assistant!",
+        "David has experience in full-stack development!"
+    ];
+    
+    // Position the context bubble properly
+    function positionContextBubble() {
+        console.log('Positioning context bubble for fun facts');
         
-        // Play open sound
-        const openSound = new Howl({
-            src: ['src/sounds/open.mp3'],
-            volume: 0.3
-        });
-        openSound.play();
+        // Add a class to style the context bubble differently
+        chatbotContext.classList.add('fun-fact-bubble');
         
-        // Focus input
-        if (chatbotContainer.classList.contains('active')) {
-            chatbotInput.focus();
+        // Remove any existing styles first to avoid conflicts
+        const existingStyles = document.getElementById('chatbot-context-styles');
+        if (existingStyles) {
+            existingStyles.remove();
+        }
+        
+        // Add CSS to the head
+        const styleEl = document.createElement('style');
+        styleEl.id = 'chatbot-context-styles';
+        styleEl.textContent = `
+            .chatbot-context.fun-fact-bubble {
+                position: absolute;
+                bottom: auto !important;
+                left: auto !important;
+                top: -100px !important; /* Position it higher above the face */
+                right: -20px !important; /* Offset to the right */
+                width: 180px !important; /* Fixed width for better text wrapping */
+                max-width: 180px !important;
+                background-color: var(--accent-color);
+                color: white;
+                border-radius: 10px;
+                padding: 10px 12px;
+                font-size: 13px;
+                line-height: 1.3;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+                transform-origin: bottom right;
+                z-index: 1000;
+                pointer-events: none; /* Prevent blocking clicks */
+                opacity: 0;
+                transition: opacity 0.3s ease, transform 0.3s ease;
+                transform: scale(0.8) translateY(10px);
+                word-wrap: break-word;
+                overflow-wrap: break-word;
+                hyphens: auto;
+                text-align: center;
+            }
+            
+            .chatbot-context.fun-fact-bubble:after {
+                content: '';
+                position: absolute;
+                bottom: -8px;
+                right: 30px;
+                width: 0;
+                height: 0;
+                border-left: 8px solid transparent;
+                border-right: 8px solid transparent;
+                border-top: 8px solid var(--accent-color);
+            }
+            
+            .chatbot-context.fun-fact-bubble.show {
+                opacity: 1 !important;
+                transform: scale(1) translateY(0) !important;
+            }
+        `;
+        document.head.appendChild(styleEl);
+        
+        // Apply direct styles to ensure they take effect
+        chatbotContext.style.position = 'absolute';
+        chatbotContext.style.bottom = 'auto';
+        chatbotContext.style.left = 'auto';
+        chatbotContext.style.top = '-100px';
+        chatbotContext.style.right = '-20px';
+        chatbotContext.style.width = '180px';
+        chatbotContext.style.maxWidth = '180px';
+        chatbotContext.style.fontSize = '13px';
+        chatbotContext.style.lineHeight = '1.3';
+        chatbotContext.style.padding = '10px 12px';
+        chatbotContext.style.textAlign = 'center';
+        chatbotContext.style.wordWrap = 'break-word';
+        chatbotContext.style.overflowWrap = 'break-word';
+        chatbotContext.style.hyphens = 'auto';
+        chatbotContext.style.zIndex = '1000';
+        chatbotContext.style.pointerEvents = 'none';
+        
+        console.log('Context bubble styles applied');
+    }
+    
+    // Function to check if we're in the hero section
+    function checkVisibleSection() {
+        const heroSection = document.getElementById('hero');
+        const aboutSection = document.getElementById('about');
+        
+        if (!heroSection || !aboutSection) return true; // Default to visible if sections not found
+        
+        const heroRect = heroSection.getBoundingClientRect();
+        const aboutRect = aboutSection.getBoundingClientRect();
+        
+        // Only follow in hero section, return to default position when about section is visible
+        return heroRect.bottom > 0 && aboutRect.top > window.innerHeight * 0.5;
+    }
+    
+    // Function to update chatbot position with spring physics for smooth, goofy movement
+    function updateChatbotPosition() {
+        // Spring physics for smooth, bouncy movement
+        const springFactor = 0.08; // Lower = more delay and bounce
+        const friction = 0.9; // Friction to slow down movement
+        const dx = targetX - currentX;
+        const dy = targetY - currentY;
+        
+        // Calculate velocity with momentum
+        velocity.x = velocity.x * friction + dx * springFactor;
+        velocity.y = velocity.y * friction + dy * springFactor;
+        
+        // Only move if we're more than 1px away from target or have significant velocity
+        if (Math.abs(dx) > 1 || Math.abs(dy) > 1 || Math.abs(velocity.x) > 0.1 || Math.abs(velocity.y) > 0.1) {
+            currentX += velocity.x;
+            currentY += velocity.y;
+            
+            // Apply the position
+            chatbotContainer.style.transform = `translate(${-currentX}px, ${-currentY}px)`;
+            
+            // Add some rotation based on velocity for dragging effect
+            const rotation = Math.min(8, Math.max(-8, velocity.x * 0.2));
+            const stretch = Math.max(0.9, Math.min(1.1, 1 + Math.abs(velocity.x) * 0.001));
+            chatbotToggle.style.transform = `rotate(${rotation}deg) scaleX(${stretch})`;
+            
+            isMoving = true;
+            lastMoveTime = Date.now();
+            
+            // Clear any existing timeout and set a new one
+            clearTimeout(moveTimeout);
+            moveTimeout = setTimeout(() => {
+                if (Date.now() - lastMoveTime > 300) {
+                    isMoving = false;
+                    // Return to normal rotation and scale
+                    chatbotToggle.style.transform = 'rotate(0deg) scaleX(1)';
+                }
+            }, 300);
+            
+            requestAnimationFrame(updateChatbotPosition);
+        } else {
+            isMoving = false;
+            velocity.x = 0;
+            velocity.y = 0;
+            chatbotToggle.style.transform = 'rotate(0deg) scaleX(1)';
+        }
+    }
+    
+    // Function to show random expressions
+    function showRandomExpression() {
+        // Only show expressions when not moving and not too often
+        if (!isMoving && Date.now() - lastExpression > 5000 && Math.random() < 0.3) {
+            const expressions = [
+                () => {
+                    // Surprised expression
+                    chatbotFace.style.animation = 'surprised 0.5s ease-in-out';
+                    setTimeout(() => {
+                        chatbotFace.style.animation = '';
+                    }, 500);
+                },
+                () => {
+                    // Wobble
+                    chatbotToggle.style.animation = 'wobble 0.5s ease-in-out';
+                    setTimeout(() => {
+                        chatbotToggle.style.animation = '';
+                    }, 500);
+                },
+                () => {
+                    // Bounce
+                    chatbotContainer.style.animation = 'bounce 0.5s ease-in-out';
+                    setTimeout(() => {
+                        chatbotContainer.style.animation = '';
+                    }, 500);
+                }
+            ];
+            
+            // Pick a random expression
+            const randomExpression = expressions[Math.floor(Math.random() * expressions.length)];
+            randomExpression();
+            
+            lastExpression = Date.now();
+        }
+        
+        // Schedule next expression check
+        expressionTimeout = setTimeout(showRandomExpression, 1000);
+    }
+
+    // Function to show a random fun fact
+    function showRandomFunFact() {
+        if (Date.now() - lastFunFactTime > 8000 && checkVisibleSection() && !chatbotWindow.classList.contains('open')) {
+            const randomFact = funFacts[Math.floor(Math.random() * funFacts.length)];
+            chatbotContext.textContent = randomFact;
+            
+            // Ensure positioning is correct before showing
+            chatbotContext.style.top = '-100px';
+            chatbotContext.style.right = '-20px';
+            chatbotContext.style.bottom = 'auto';
+            chatbotContext.style.left = 'auto';
+            chatbotContext.style.width = '180px';
+            chatbotContext.style.maxWidth = '180px';
+            
+            // Show the fun fact
+            chatbotContext.classList.add('show');
+            console.log('Showing fun fact:', randomFact);
+            
+            setTimeout(() => {
+                chatbotContext.classList.remove('show');
+            }, 5000);
+            
+            lastFunFactTime = Date.now();
+        }
+    }
+
+    // Initialize the context bubble positioning
+    positionContextBubble();
+
+    // Add mouse move event listener for face and chatbot following
+    document.addEventListener('mousemove', (e) => {
+        // Only follow mouse when not in chat mode and in hero section
+        const shouldFollowMouse = !chatbotWindow.classList.contains('open') && checkVisibleSection();
+        
+        if (shouldFollowMouse) {
+            // Calculate mouse position
+            const mouseX = e.clientX / window.innerWidth;
+            const mouseY = e.clientY / window.innerHeight;
+            
+            // Update last mouse position
+            lastMouseX = mouseX;
+            lastMouseY = mouseY;
+            
+            // Calculate eye positions with reduced movement (more steady)
+            const leftEyeX = 18 + (mouseX - 0.5) * 6;  // Reduced from 15 to 6
+            const leftEyeY = 20 + (mouseY - 0.5) * 6;  // Reduced from 15 to 6
+            const rightEyeX = 18 + (mouseX - 0.5) * 6; // Reduced from 15 to 6
+            const rightEyeY = 20 + (mouseY - 0.5) * 6; // Reduced from 15 to 6
+            
+            // Update face position with reduced movement
+            const faceLeftPos = 15 + (mouseX - 0.5) * 8;  // Reduced from 20 to 8
+            const faceBottomPos = 18 + (mouseY - 0.5) * 8; // Reduced from 20 to 8
+            
+            // Update face position directly with CSS variables
+            chatbotFace.style.setProperty('--face-left', `${faceLeftPos}px`);
+            chatbotFace.style.setProperty('--face-bottom', `${faceBottomPos}px`);
+            
+            // Update eye positions via CSS variables
+            chatbotToggle.style.setProperty('--eye-left-x', `${leftEyeX}px`);
+            chatbotToggle.style.setProperty('--eye-left-y', `${leftEyeY}px`);
+            chatbotToggle.style.setProperty('--eye-right-x', `${rightEyeX}px`);
+            chatbotToggle.style.setProperty('--eye-right-y', `${rightEyeY}px`);
+            
+            // Move the entire chatbot to follow the mouse across the screen
+            // Map mouse position to screen coordinates with some padding
+            const screenPadding = 80; // Padding from screen edges in pixels
+            targetX = window.innerWidth - e.clientX;
+            targetY = window.innerHeight - e.clientY;
+            
+            // Ensure we're within bounds (not too close to screen edges)
+            targetX = Math.max(screenPadding, Math.min(window.innerWidth - screenPadding, targetX));
+            targetY = Math.max(screenPadding, Math.min(window.innerHeight - screenPadding, targetY));
+            
+            // Start the animation if not already running
+            if (!isMoving) {
+                updateChatbotPosition();
+            }
+            
+            // Show random fun facts in following mode
+            showRandomFunFact();
+        } else {
+            // Reset to default position when chat is open or scrolled past hero section
+            targetX = originalRight;
+            targetY = originalBottom;
+            
+            if (!isMoving) {
+                updateChatbotPosition();
+            }
+            
+            // Reset face and eyes to center
+            chatbotFace.style.setProperty('--face-left', '15px');
+            chatbotFace.style.setProperty('--face-bottom', '18px');
+            chatbotToggle.style.setProperty('--eye-left-x', '18px');
+            chatbotToggle.style.setProperty('--eye-left-y', '20px');
+            chatbotToggle.style.setProperty('--eye-right-x', '18px');
+            chatbotToggle.style.setProperty('--eye-right-y', '20px');
         }
     });
     
-    // Close chatbot
-    chatbotClose.addEventListener('click', () => {
-        chatbotContainer.classList.remove('active');
+    // Check scroll position to update chatbot visibility and behavior
+    window.addEventListener('scroll', () => {
+        const shouldFollowMouse = checkVisibleSection();
         
-        // Play close sound
-        const closeSound = new Howl({
-            src: ['src/sounds/close.mp3'],
-            volume: 0.3
-        });
-        closeSound.play();
+        // If we've scrolled past the hero section, reset to default position
+        if (!shouldFollowMouse) {
+            targetX = originalRight;
+            targetY = originalBottom;
+            
+            if (!isMoving) {
+                updateChatbotPosition();
+            }
+            
+            // Hide any fun facts when returning to default position
+            chatbotContext.classList.remove('show');
+        }
     });
     
-    // Send message
+    // Start random expressions
+    showRandomExpression();
+    
+    // Clean up on page unload
+    window.addEventListener('beforeunload', () => {
+        clearTimeout(moveTimeout);
+        clearTimeout(expressionTimeout);
+    });
+    
+    // Context awareness variables
+    let currentSection = '';
+    let hasInteracted = false;
+    let suggestionsShown = false;
+    const contextMessages = {
+        'hero': [
+            "Welcome to David's portfolio! Would you like to learn more about his projects or skills?",
+            "I can help you navigate the site. What would you like to explore first?"
+        ],
+        'about': [
+            "David is a Computer Science & AI student with expertise in software development and robotics.",
+            "Interested in knowing more about David's background or achievements?"
+        ],
+        'experience': [
+            "David has experience as a Lead Software Developer at Jobsi and as a Robotics Engineer.",
+            "Want to learn more about his professional journey?"
+        ],
+        'skills': [
+            "David's core skills include Python, JavaScript, C++, and machine learning.",
+            "His expertise spans across AI, robotics, and full-stack development."
+        ],
+        'projects': [
+            "Check out David's projects like the Quadruped Robot and Jobsi Web App.",
+            "Would you like details about a specific project?"
+        ],
+        'education': [
+            "David is pursuing a Bachelor's in Computer Science & AI at IE University.",
+            "He also has leadership experience through programs like Taglit Excel."
+        ],
+        'contact': [
+            "You can get in touch with David through the contact form or his social profiles.",
+            "Need David's contact information or want to send him a message?"
+        ]
+    };
+    
+    const suggestions = {
+        'hero': ['Tell me about your work', 'What are your skills?', 'Show me your projects'],
+        'about': ['What are your achievements?', 'Tell me more about your background', 'What activities do you enjoy?'],
+        'experience': ['Tell me about Jobsi', 'Robotics experience', 'Software development projects'],
+        'skills': ['Machine learning expertise', 'Programming languages', 'Technical skills'],
+        'projects': ['Quadruped Robot details', 'Jobsi Web App', 'Data Visualization Tool'],
+        'education': ['Academic background', 'Leadership programs', 'Courses taken'],
+        'contact': ['How can I contact you?', 'Social profiles', 'Send a message']
+    };
+    
+    // Check which section is currently in view
+    function updateCurrentSection() {
+        const sections = document.querySelectorAll('section');
+        let inView = '';
+        
+        sections.forEach(section => {
+            const rect = section.getBoundingClientRect();
+            // Element is considered in view if it's in the viewport
+            if (rect.top < window.innerHeight / 2 && rect.bottom > window.innerHeight / 2) {
+                inView = section.id;
+            }
+        });
+        
+        if (inView && inView !== currentSection) {
+            currentSection = inView;
+            
+            // Only show context message if user hasn't interacted with chatbot yet
+            if (!chatbotWindow.classList.contains('open') && !hasInteracted) {
+                showContextMessage();
+            }
+            
+            // Update suggestions based on current section
+            if (chatbotWindow.classList.contains('open')) {
+                updateSuggestions();
+            }
+        }
+    }
+    
+    function showContextMessage() {
+        if (currentSection && contextMessages[currentSection] && Math.random() > 0.7) {
+            const message = contextMessages[currentSection][Math.floor(Math.random() * contextMessages[currentSection].length)];
+            chatbotContext.textContent = message;
+            chatbotContext.classList.add('show');
+            
+            setTimeout(() => {
+                chatbotContext.classList.remove('show');
+            }, 5000);
+        }
+    }
+    
+    function updateSuggestions() {
+        if (!suggestionsShown && currentSection && suggestions[currentSection]) {
+            chatbotSuggestions.innerHTML = '';
+            
+            suggestions[currentSection].forEach(suggestion => {
+                const chip = document.createElement('div');
+                chip.className = 'suggestion-chip';
+                chip.textContent = suggestion;
+                chip.addEventListener('click', () => {
+                    chatbotInput.value = suggestion;
+                    sendMessage();
+                });
+                chatbotSuggestions.appendChild(chip);
+            });
+            
+            // Animate suggestions in
+            anime({
+                targets: '.suggestion-chip',
+                translateY: [10, 0],
+                opacity: [0, 1],
+                delay: anime.stagger(100),
+                easing: 'easeOutQuad'
+            });
+            
+            suggestionsShown = true;
+        }
+    }
+    
+    // Add event listeners for scroll to detect current section
+    window.addEventListener('scroll', updateCurrentSection);
+    
+    // Initialize with current section
+    setTimeout(updateCurrentSection, 1000);
+    
+    // Toggle chatbot window
+    chatbotToggle.addEventListener('click', () => {
+        chatbotWindow.classList.toggle('open');
+        chatbotToggle.classList.toggle('active');
+        
+        if (chatbotWindow.classList.contains('open')) {
+            updateSuggestions();
+            chatbotInput.focus();
+            
+            // Add typing animation for welcome message
+            if (!hasInteracted) {
+                // Clear existing messages
+                chatbotMessages.innerHTML = '';
+                
+                // Add typing indicator
+                const typingIndicator = document.createElement('div');
+                typingIndicator.className = 'message bot-message typing-indicator';
+                typingIndicator.innerHTML = '<span class="message-dot"></span><span class="message-dot"></span><span class="message-dot"></span>';
+                chatbotMessages.appendChild(typingIndicator);
+                
+                // Replace with actual message after delay
+                setTimeout(() => {
+                    chatbotMessages.removeChild(typingIndicator);
+                    
+                    // Use contextual welcome message based on current section
+                    let welcomeMessage = "Hi! I'm David's AI assistant. What would you like to know about his work?";
+                    if (currentSection && contextMessages[currentSection]) {
+                        welcomeMessage = contextMessages[currentSection][0];
+                    }
+                    
+                    addMessage(welcomeMessage, 'bot');
+                }, 1500);
+            }
+        } else {
+            // Reset suggestions shown flag when closing
+            suggestionsShown = false;
+        }
+        
+        hasInteracted = true;
+    });
+    
+    // Close chatbot window
+    chatbotClose.addEventListener('click', (e) => {
+        e.stopPropagation();
+        chatbotWindow.classList.remove('open');
+        chatbotToggle.classList.remove('active');
+        suggestionsShown = false;
+    });
+    
+    // Send message on button click
+    chatbotSend.addEventListener('click', sendMessage);
+    
+    // Send message on Enter key
+    chatbotInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            sendMessage();
+        }
+    });
+    
+    // Function to send user message
     function sendMessage() {
         const message = chatbotInput.value.trim();
         
@@ -753,60 +1258,143 @@ function initChatbot() {
             // Clear input
             chatbotInput.value = '';
             
-            // Simulate bot response
+            // Hide suggestions after user sends a message
+            chatbotSuggestions.style.display = 'none';
+            
+            // Add typing indicator
+            const typingIndicator = document.createElement('div');
+            typingIndicator.className = 'message bot-message typing-indicator';
+            typingIndicator.innerHTML = '<span class="message-dot"></span><span class="message-dot"></span><span class="message-dot"></span>';
+            chatbotMessages.appendChild(typingIndicator);
+            
+            // Scroll to bottom
+            chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+            
+            // Process the message and respond after a delay
             setTimeout(() => {
-                let response;
+                // Remove typing indicator
+                chatbotMessages.removeChild(typingIndicator);
                 
-                // Simple responses based on keywords
-                if (message.toLowerCase().includes('hello') || message.toLowerCase().includes('hi')) {
-                    response = "Hello! I'm David's AI assistant. How can I help you today?";
-                } else if (message.toLowerCase().includes('project') || message.toLowerCase().includes('work')) {
-                    response = "David has worked on several exciting projects in robotics and AI. Check out the Projects section to learn more!";
-                } else if (message.toLowerCase().includes('contact') || message.toLowerCase().includes('email')) {
-                    response = "You can contact David via email at david.vargas@example.com or through the contact form on this page.";
-                } else if (message.toLowerCase().includes('experience') || message.toLowerCase().includes('job')) {
-                    response = "David has experience as a Lead Software Developer, Robotics Engineer, and Software Engineer Intern. His expertise includes Python, JavaScript, and robotics programming.";
-                } else if (message.toLowerCase().includes('education') || message.toLowerCase().includes('study')) {
-                    response = "David studied Computer Science with a focus on AI and Robotics. He has a strong academic background and has participated in various research projects.";
-                } else if (message.toLowerCase().includes('skill') || message.toLowerCase().includes('know')) {
-                    response = "David's key skills include Python, JavaScript, C++, Machine Learning, Robotics, and Web Development. He's particularly strong in AI applications.";
-                } else {
-                    response = "I'm a simple AI assistant. If you have specific questions about David's work or experience, please let me know!";
-                }
+                // Generate response based on user message
+                const response = generateResponse(message);
                 
+                // Add bot response
                 addMessage(response, 'bot');
-            }, 1000);
+                
+                // Show new contextual suggestions
+                showResponseSuggestions(message);
+            }, 1000 + Math.random() * 1000); // Random delay between 1-2 seconds
         }
     }
     
-    // Add message to chat
+    // Function to generate response based on user message
+    function generateResponse(message) {
+        message = message.toLowerCase();
+        
+        // Check for keywords and generate appropriate responses
+        if (message.includes('project') || message.includes('work')) {
+            return "David has worked on some amazing projects including a Quadruped Robot, Jobsi Web App, and Data Visualization Tool. Each demonstrates his skills in different areas of technology. Which one would you like to know more about?";
+        } else if (message.includes('robot') || message.includes('quadruped')) {
+            return "The Quadruped Robot was built with optimized movement algorithms using PyTorch and has remote control capabilities via Raspberry Pi. It can navigate various terrains and showcases David's robotics engineering skills.";
+        } else if (message.includes('jobsi') || message.includes('web app')) {
+            return "The Jobsi Web App is a full-stack application with AI integration that revolutionizes the job application process. It launched with over 2,000 users on day one and features a responsive UI for optimal user experience.";
+        } else if (message.includes('data') || message.includes('visualization')) {
+            return "The Data Visualization Tool creates interactive dashboards for complex data analysis, enabling clients to make data-driven decisions more efficiently. It improved decision-making processes by 20%.";
+        } else if (message.includes('skill') || message.includes('expertise')) {
+            return "David's core skills include Python, JavaScript, C++, AI, and robotics engineering. He also has experience in full-stack development, data analysis, and machine learning.";
+        } else if (message.includes('contact') || message.includes('get in touch')) {
+            return "You can contact David through the contact form in the Contact section, or reach out via his LinkedIn and GitHub profiles linked at the bottom of the page.";
+        } else if (message.includes('education') || message.includes('study')) {
+            return "David is pursuing a Bachelor's in Computer Science & AI at IE University, expected to graduate in July 2026. His studies focus on machine learning, data analysis, and algorithms.";
+        } else if (message.includes('experience')) {
+            return "David has experience as a Lead Software Developer at Jobsi, a Robotics Engineer at the Robotics & AI Lab, a Software Engineer Intern at Axonius, and a Web Intern at BProto Organization.";
+        } else if (message.includes('hello') || message.includes('hi')) {
+            return "Hello! I'm David's AI assistant. How can I help you today?";
+        } else {
+            return "That's an interesting question! David's portfolio showcases his work in AI, robotics, and software development. Is there something specific you'd like to know about those areas?";
+        }
+    }
+    
+    // Function to show contextual suggestions based on the previous exchange
+    function showResponseSuggestions(userMessage) {
+        let newSuggestions = [];
+        userMessage = userMessage.toLowerCase();
+        
+        if (userMessage.includes('project') || userMessage.includes('work')) {
+            newSuggestions = ['Tell me about the robot', 'Jobsi Web App details', 'Data visualization project'];
+        } else if (userMessage.includes('robot') || userMessage.includes('quadruped')) {
+            newSuggestions = ['How was it built?', 'Other projects', 'Technical skills used'];
+        } else if (userMessage.includes('jobsi') || userMessage.includes('web app')) {
+            newSuggestions = ['Technologies used', 'User metrics', 'Other web projects'];
+        } else if (userMessage.includes('skill') || userMessage.includes('expertise')) {
+            newSuggestions = ['Programming languages', 'AI knowledge', 'Software development'];
+        } else if (userMessage.includes('contact')) {
+            newSuggestions = ['LinkedIn profile', 'GitHub projects', 'Send a message'];
+        } else {
+            newSuggestions = ['Projects', 'Experience', 'Skills', 'Contact info'];
+        }
+        
+        // Add suggestions
+        chatbotSuggestions.innerHTML = '';
+        chatbotSuggestions.style.display = 'flex';
+        
+        newSuggestions.forEach(suggestion => {
+            const chip = document.createElement('div');
+            chip.className = 'suggestion-chip';
+            chip.textContent = suggestion;
+            chip.addEventListener('click', () => {
+                chatbotInput.value = suggestion;
+                sendMessage();
+            });
+            chatbotSuggestions.appendChild(chip);
+        });
+        
+        // Animate suggestions
+        anime({
+            targets: '.suggestion-chip',
+            translateY: [10, 0],
+            opacity: [0, 1],
+            delay: anime.stagger(100),
+            easing: 'easeOutQuad'
+        });
+    }
+    
+    // Function to add message to chat
     function addMessage(text, sender) {
         const messageElement = document.createElement('div');
-        messageElement.classList.add('message', `${sender}-message`);
+        messageElement.className = `message ${sender}-message`;
         messageElement.textContent = text;
         
         chatbotMessages.appendChild(messageElement);
-        
-        // Scroll to bottom
         chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
         
-        // Play message sound
-        const messageSound = new Howl({
-            src: [`src/sounds/${sender === 'user' ? 'send' : 'receive'}.mp3`],
-            volume: 0.3
-        });
-        messageSound.play();
+        // Play sound effect for new messages
+        if (sender === 'bot') {
+            playSound('message', 0.2);
+        }
     }
     
-    // Send button click
-    chatbotSend.addEventListener('click', sendMessage);
+    // Automatically show chatbot after 10 seconds of inactivity, but only once
+    let chatbotTimer;
+    let hasShownAutomatically = false;
     
-    // Enter key press
-    chatbotInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            sendMessage();
+    function resetChatbotTimer() {
+        clearTimeout(chatbotTimer);
+        if (!hasInteracted && !hasShownAutomatically) {
+            chatbotTimer = setTimeout(() => {
+                showContextMessage();
+                hasShownAutomatically = true;
+            }, 10000);
         }
+    }
+    
+    // Reset timer on user interaction
+    ['mousemove', 'click', 'keydown', 'scroll'].forEach(event => {
+        document.addEventListener(event, resetChatbotTimer);
     });
+    
+    // Start the timer initially
+    resetChatbotTimer();
 }
 
 // Back to top button functionality
@@ -958,6 +1546,9 @@ function init3DRobot() {
     
     const container = document.getElementById('robot-container');
     const speechBubble = document.getElementById('robot-speech-bubble');
+    const robotControls = document.getElementById('robot-controls');
+    const robotProjects = document.getElementById('robot-projects');
+    const robotContact = document.getElementById('robot-contact');
     
     if (!container) {
         console.error('Robot container not found');
@@ -973,8 +1564,9 @@ function init3DRobot() {
     camera.position.z = 5;
     
     // Create renderer
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(container.clientWidth, container.clientHeight);
+    renderer.setClearColor(0x000000, 0); // Make background transparent
     container.appendChild(renderer.domElement);
     
     // Create lights
@@ -990,20 +1582,32 @@ function init3DRobot() {
     
     // Robot body (box)
     const bodyGeometry = new THREE.BoxGeometry(1, 1.5, 0.8);
-    const bodyMaterial = new THREE.MeshPhongMaterial({ color: 0x1A3C5A });
+    const bodyMaterial = new THREE.MeshPhongMaterial({ 
+        color: 0x1A3C5A,
+        specular: 0x050505,
+        shininess: 100
+    });
     const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
     robotGroup.add(body);
     
     // Robot head (sphere)
     const headGeometry = new THREE.SphereGeometry(0.5, 16, 16);
-    const headMaterial = new THREE.MeshPhongMaterial({ color: 0x00D4B4 });
+    const headMaterial = new THREE.MeshPhongMaterial({ 
+        color: 0x00D4B4,
+        specular: 0x050505,
+        shininess: 100
+    });
     const head = new THREE.Mesh(headGeometry, headMaterial);
     head.position.y = 1.25;
     robotGroup.add(head);
     
     // Robot eyes (small spheres)
     const eyeGeometry = new THREE.SphereGeometry(0.1, 8, 8);
-    const eyeMaterial = new THREE.MeshPhongMaterial({ color: 0xffffff });
+    const eyeMaterial = new THREE.MeshPhongMaterial({ 
+        color: 0xffffff,
+        emissive: 0xffffff,
+        emissiveIntensity: 0.5
+    });
     
     const leftEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
     leftEye.position.set(-0.2, 1.3, 0.4);
@@ -1015,7 +1619,11 @@ function init3DRobot() {
     
     // Robot legs (cylinders)
     const legGeometry = new THREE.CylinderGeometry(0.2, 0.2, 1, 8);
-    const legMaterial = new THREE.MeshPhongMaterial({ color: 0x00D4B4 });
+    const legMaterial = new THREE.MeshPhongMaterial({ 
+        color: 0x00D4B4,
+        specular: 0x050505,
+        shininess: 100
+    });
     
     const leftLeg = new THREE.Mesh(legGeometry, legMaterial);
     leftLeg.position.set(-0.4, -1.25, 0);
@@ -1027,7 +1635,11 @@ function init3DRobot() {
     
     // Robot arms (cylinders)
     const armGeometry = new THREE.CylinderGeometry(0.15, 0.15, 0.8, 8);
-    const armMaterial = new THREE.MeshPhongMaterial({ color: 0x00D4B4 });
+    const armMaterial = new THREE.MeshPhongMaterial({ 
+        color: 0x00D4B4,
+        specular: 0x050505,
+        shininess: 100
+    });
     
     const leftArm = new THREE.Mesh(armGeometry, armMaterial);
     leftArm.rotation.z = Math.PI / 2;
@@ -1074,15 +1686,32 @@ function init3DRobot() {
                 leftArm.rotation.z = Math.PI / 2;
                 rightArm.rotation.z = -Math.PI / 2;
                 
-                // Show speech bubble
+                // Show speech bubble and controls
                 if (speechBubble) {
                     speechBubble.classList.add('active');
+                }
+                
+                if (robotControls) {
+                    setTimeout(() => {
+                        robotControls.classList.add('active');
+                    }, 1000);
                 }
             }
         } else {
             // Idle animation
             head.position.y = 1.25 + Math.sin(Date.now() * 0.002) * 0.05;
             robotGroup.position.y = Math.sin(Date.now() * 0.001) * 0.05;
+            
+            // Eye blinking animation
+            if (Math.random() < 0.005) {
+                leftEye.scale.y = 0.1;
+                rightEye.scale.y = 0.1;
+                
+                setTimeout(() => {
+                    leftEye.scale.y = 1;
+                    rightEye.scale.y = 1;
+                }, 150);
+            }
         }
         
         renderer.render(scene, camera);
@@ -1110,12 +1739,99 @@ function init3DRobot() {
                 }
             });
             
-            // Update speech bubble
+            // Wave animation for right arm
+            anime({
+                targets: rightArm.rotation,
+                z: -Math.PI / 4,
+                duration: 300,
+                easing: 'easeOutQuad',
+                complete: () => {
+                    anime({
+                        targets: rightArm.rotation,
+                        z: -Math.PI / 2,
+                        duration: 300,
+                        delay: 200,
+                        easing: 'easeInOutQuad'
+                    });
+                }
+            });
+            
+            // Update speech bubble with helpful text
             if (speechBubble) {
-                speechBubble.querySelector('p').textContent = 'Explore my work below!';
+                speechBubble.querySelector('p').textContent = 'Hi there! Click one of the buttons below to explore!';
             }
         }
     });
+    
+    // Add mouse leave interaction
+    container.addEventListener('mouseleave', () => {
+        if (walkingComplete && speechBubble) {
+            speechBubble.querySelector('p').textContent = "Hi, I'm David's robot assistant! I can help you navigate.";
+        }
+    });
+    
+    // Add click functionality to buttons
+    if (robotProjects) {
+        robotProjects.addEventListener('click', () => {
+            // Animate head nod
+            anime({
+                targets: head.rotation,
+                x: -0.3,
+                duration: 300,
+                easing: 'easeOutQuad',
+                complete: () => {
+                    anime({
+                        targets: head.rotation,
+                        x: 0,
+                        duration: 300,
+                        easing: 'easeInOutQuad'
+                    });
+                }
+            });
+            
+            // Smoothly scroll to projects section
+            document.querySelector('#projects').scrollIntoView({ 
+                behavior: 'smooth',
+                block: 'start' 
+            });
+            
+            // Update speech bubble
+            if (speechBubble) {
+                speechBubble.querySelector('p').textContent = 'Check out these amazing projects!';
+            }
+        });
+    }
+    
+    if (robotContact) {
+        robotContact.addEventListener('click', () => {
+            // Animate arm wave
+            anime({
+                targets: rightArm.rotation,
+                z: -Math.PI / 4,
+                duration: 300,
+                easing: 'easeOutQuad',
+                complete: () => {
+                    anime({
+                        targets: rightArm.rotation,
+                        z: -Math.PI / 2,
+                        duration: 300,
+                        easing: 'easeInOutQuad'
+                    });
+                }
+            });
+            
+            // Smoothly scroll to contact section
+            document.querySelector('#contact').scrollIntoView({ 
+                behavior: 'smooth',
+                block: 'start' 
+            });
+            
+            // Update speech bubble
+            if (speechBubble) {
+                speechBubble.querySelector('p').textContent = 'Get in touch with David!';
+            }
+        });
+    }
     
     // Handle window resize
     window.addEventListener('resize', () => {
@@ -1123,6 +1839,200 @@ function init3DRobot() {
         camera.updateProjectionMatrix();
         renderer.setSize(container.clientWidth, container.clientHeight);
     });
+}
+
+function initNeuralSphere() {
+    console.log('Initializing neural sphere with direct mouse connections');
+
+    const container = document.getElementById('neural-sphere-container');
+    if (!container) {
+        console.error('Neural sphere container not found');
+        return;
+    }
+
+    // Clear any existing content
+    container.innerHTML = '';
+
+    // Create the neural sphere element
+    const neuralSphere = document.createElement('div');
+    neuralSphere.className = 'neural-sphere';
+    container.appendChild(neuralSphere);
+
+    // Create nodes
+    const nodes = [];
+    const numNodes = 60;
+
+    // Create nodes in a spherical pattern
+    for (let i = 0; i < numNodes; i++) {
+        const node = document.createElement('div');
+        node.className = 'neural-node';
+        
+        // Use spherical coordinates for even distribution
+        const phi = Math.acos(-1 + (2 * i) / numNodes);
+        const theta = Math.sqrt(numNodes * Math.PI) * phi;
+        
+        // Random radius between 150-250px
+        const radius = 150 + Math.random() * 100;
+        
+        // Convert to Cartesian coordinates
+        const x = radius * Math.sin(phi) * Math.cos(theta);
+        const y = radius * Math.sin(phi) * Math.sin(theta);
+        const z = radius * Math.cos(phi);
+        
+        node.style.transform = `translate3d(${x}px, ${y}px, ${z}px)`;
+        
+        nodes.push({
+            element: node,
+            x: x,
+            y: y,
+            z: z
+        });
+        
+        neuralSphere.appendChild(node);
+    }
+
+    // Create static connections between nodes
+    const connections = [];
+    const connectionDistance = 120;
+    
+    for (let i = 0; i < nodes.length; i++) {
+        for (let j = i + 1; j < nodes.length; j++) {
+            const node1 = nodes[i];
+            const node2 = nodes[j];
+            
+            const dx = node1.x - node2.x;
+            const dy = node1.y - node2.y;
+            const dz = node1.z - node2.z;
+            const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
+            
+            if (distance < connectionDistance) {
+                const connection = document.createElement('div');
+                connection.className = 'neural-connection';
+                
+                // Calculate rotation angles
+                const rotY = Math.atan2(dz, dx);
+                const rotX = Math.atan2(Math.sqrt(dx * dx + dz * dz), dy);
+                
+                // Set connection style
+                connection.style.width = `${distance}px`;
+                connection.style.transform = `translate3d(${node1.x}px, ${node1.y}px, ${node1.z}px) rotateY(${rotY}rad) rotateX(${rotX}rad)`;
+                
+                neuralSphere.appendChild(connection);
+                connections.push({
+                    element: connection,
+                    node1: node1,
+                    node2: node2
+                });
+            }
+        }
+    }
+
+    // Create mouse connections (one for each node)
+    const mouseConnections = [];
+    const mouseNode = { x: 0, y: 0, z: 50 }; // Mouse position in 3D space
+    const mouseConnectionDistance = 180; // Distance threshold for mouse connections
+    
+    // Create connection elements for each node to mouse
+    for (let i = 0; i < nodes.length; i++) {
+        const connection = document.createElement('div');
+        connection.className = 'mouse-connection';
+        connection.style.opacity = '0'; // Start invisible
+        neuralSphere.appendChild(connection);
+        
+        mouseConnections.push({
+            element: connection,
+            node: nodes[i],
+            active: false
+        });
+    }
+
+    // Function to update mouse connections
+    function updateMouseConnections() {
+        let activeCount = 0;
+        
+        for (let i = 0; i < nodes.length; i++) {
+            const node = nodes[i];
+            const connection = mouseConnections[i];
+            
+            // Calculate distance from node to mouse
+            const dx = mouseNode.x - node.x;
+            const dy = mouseNode.y - node.y;
+            const dz = mouseNode.z - node.z;
+            const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
+            
+            // Check if node is close enough to mouse
+            if (distance < mouseConnectionDistance) {
+                // Calculate rotation angles
+                const rotY = Math.atan2(dz, dx);
+                const rotX = Math.atan2(Math.sqrt(dx * dx + dz * dz), dy);
+                
+                // Update connection style
+                connection.element.style.width = `${distance}px`;
+                connection.element.style.transform = `translate3d(${node.x}px, ${node.y}px, ${node.z}px) rotateY(${rotY}rad) rotateX(${rotX}rad)`;
+                connection.element.style.opacity = '1';
+                
+                // Highlight connected node
+                node.element.style.transform = `translate3d(${node.x}px, ${node.y}px, ${node.z}px) scale(1.5)`;
+                node.element.style.boxShadow = '0 0 15px var(--accent-color)';
+                
+                connection.active = true;
+                activeCount++;
+            } else if (connection.active) {
+                // Hide connection if it was previously active
+                connection.element.style.opacity = '0';
+                
+                // Reset node appearance
+                node.element.style.transform = `translate3d(${node.x}px, ${node.y}px, ${node.z}px) scale(1)`;
+                node.element.style.boxShadow = '0 0 8px var(--accent-color)';
+                
+                connection.active = false;
+            }
+        }
+        
+        console.log(`Active mouse connections: ${activeCount}`);
+    }
+
+    // Handle mouse movement
+    function handleMouseMove(e) {
+        // Get container position
+        const rect = container.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        
+        // Convert mouse position to neural sphere coordinates
+        mouseNode.x = (e.clientX - centerX) * 0.8;
+        mouseNode.y = (e.clientY - centerY) * 0.8;
+        
+        // Debug info
+        console.log(`Mouse position: ${mouseNode.x.toFixed(0)}, ${mouseNode.y.toFixed(0)}, ${mouseNode.z}`);
+        
+        // Rotate the sphere slightly based on mouse position
+        const rotateX = (e.clientY - centerY) / rect.height * 20;
+        const rotateY = (e.clientX - centerX) / rect.width * 20;
+        neuralSphere.style.transform = `translate(-50%, -50%) rotateX(${-rotateX}deg) rotateY(${rotateY}deg)`;
+        
+        // Update mouse connections
+        updateMouseConnections();
+    }
+
+    // Add event listeners for mouse movement
+    document.addEventListener('mousemove', handleMouseMove);
+    
+    // Also handle touch events for mobile
+    document.addEventListener('touchmove', function(e) {
+        if (e.touches.length > 0) {
+            const touch = e.touches[0];
+            handleMouseMove({
+                clientX: touch.clientX,
+                clientY: touch.clientY
+            });
+        }
+    }, { passive: true });
+
+    // Initial update
+    updateMouseConnections();
+    
+    console.log(`Neural sphere initialized with ${nodes.length} nodes and ${connections.length} static connections`);
 }
 
 // Fallback to a simple robot animation if Three.js is not available

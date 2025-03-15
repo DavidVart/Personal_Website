@@ -68,6 +68,7 @@
         <!-- Hero Section -->
         <section id="hero" class="hero-section">
             <div id="particles-js"></div>
+            <div class="neural-sphere-container" id="neural-sphere-container"></div>
             <div class="container">
                 <div class="hero-content">
                     <h2 class="fade-in">Hi, I'm David Vargas</h2>
@@ -75,14 +76,6 @@
                     <div class="hero-cta fade-in">
                         <a href="#experience" class="cta-button">Explore My Work</a>
                         <a href="#contact" class="cta-button secondary">Get In Touch</a>
-                    </div>
-                </div>
-                <div class="hero-image fade-in">
-                    <div id="robot-container" class="robot-3d-container">
-                        <!-- 3D robot will be rendered here -->
-                        <div id="robot-speech-bubble" class="speech-bubble">
-                            <p>Hi, I'm David's robot assistant! Explore his work below.</p>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -537,8 +530,9 @@
     <!-- AI Chatbot -->
     <div class="chatbot-container">
         <div class="chatbot-toggle" id="chatbot-toggle">
-            <i class="fas fa-robot"></i>
+            <div class="chatbot-face"></div>
         </div>
+        <div class="chatbot-context-aware" id="chatbot-context">Check out my projects!</div>
         <div class="chatbot-window" id="chatbot-window">
             <div class="chatbot-header">
                 <span>David's AI Assistant</span>
@@ -546,12 +540,17 @@
             </div>
             <div class="chatbot-messages" id="chatbot-messages">
                 <div class="message bot-message">
-                    Hi! I'm David's AI assistant. Want to know more about his robotics projects?
+                    Hi! I'm David's AI assistant. What would you like to know about his work?
                 </div>
+            </div>
+            <div class="chatbot-suggestions" id="chatbot-suggestions">
+                <div class="suggestion-chip">Tell me about your projects</div>
+                <div class="suggestion-chip">Skills & expertise</div>
+                <div class="suggestion-chip">Contact info</div>
             </div>
             <div class="chatbot-input">
                 <input type="text" id="chatbot-input-field" placeholder="Type your message...">
-                <button id="chatbot-send">Send</button>
+                <button id="chatbot-send"><i class="fas fa-paper-plane"></i></button>
             </div>
         </div>
     </div>
