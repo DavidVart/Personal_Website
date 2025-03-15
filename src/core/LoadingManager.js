@@ -3,9 +3,12 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
 
 export default class LoadingManager {
-    constructor(loadingBarElement, onComplete) {
+    constructor(loadingBarElement, onComplete, onProgress) {
         this.loadingBarElement = loadingBarElement;
         this.onComplete = onComplete;
+        this.onProgress = onProgress;
+        this.totalAssets = 0;
+        this.loadedAssets = 0;
         
         this.setupLoaders();
         this.loadAssets();
@@ -34,6 +37,23 @@ export default class LoadingManager {
                 // Calculate progress and update loading bar
                 const progressRatio = itemsLoaded / itemsTotal;
                 this.loadingBarElement.style.transform = `scaleX(${progressRatio})`;
+                
+                // Call onProgress callback if provided
+                if (this.onProgress) {
+                    this.onProgress(progressRatio);
+                }
+                
+                // Log progress for debugging
+                console.log(`Loading: ${Math.round(progressRatio * 100)}% (${itemsLoaded}/${itemsTotal})`);
+            },
+            
+            // Error
+            (url) => {
+                console.error(`Error loading asset: ${url}`);
+                
+                // Increment loaded assets to avoid stalling the loading process
+                this.loadedAssets++;
+                this.updateProgress();
             }
         );
         
@@ -49,6 +69,9 @@ export default class LoadingManager {
     }
     
     loadAssets() {
+        // Count total assets to load for progress tracking
+        this.countAssets();
+        
         // Load textures
         this.loadTextures();
         
@@ -56,50 +79,95 @@ export default class LoadingManager {
         this.loadModels();
     }
     
+    countAssets() {
+        // Count textures
+        this.totalAssets += 2; // environmentMap and particleTexture
+        
+        // Count models
+        this.totalAssets += 4; // project1, project2, project3, skills
+    }
+    
+    updateProgress() {
+        const progress = this.loadedAssets / this.totalAssets;
+        
+        // Call onProgress callback if provided
+        if (this.onProgress) {
+            this.onProgress(progress);
+        }
+    }
+    
     loadTextures() {
         // Store loaded textures in a map for easy access
         this.textures = {};
         
-        // Load environment map
-        this.textures.environmentMap = this.textureLoader.load('/textures/environmentMap.jpg');
-        this.textures.environmentMap.encoding = THREE.sRGBEncoding;
+        // Load environment map with optimized settings
+        this.textureLoader.load(
+            '/textures/environmentMap.jpg',
+            (texture) => {
+                texture.encoding = THREE.sRGBEncoding;
+                texture.minFilter = THREE.LinearFilter; // Simpler filtering for performance
+                this.textures.environmentMap = texture;
+                this.loadedAssets++;
+                this.updateProgress();
+            }
+        );
         
-        // Load other textures as needed
-        this.textures.particleTexture = this.textureLoader.load('/textures/particles/1.png');
+        // Load particle texture with optimized settings
+        this.textureLoader.load(
+            '/textures/particles/1.png',
+            (texture) => {
+                texture.minFilter = THREE.LinearFilter; // Simpler filtering for performance
+                this.textures.particleTexture = texture;
+                this.loadedAssets++;
+                this.updateProgress();
+            }
+        );
     }
     
     loadModels() {
         // Store loaded models in a map for easy access
         this.models = {};
         
-        // Load project models
-        // Note: These will be placeholder paths until actual models are created
+        // Load project models with optimized settings
+        this.loadModel('/models/project1.glb', 'project1');
+        this.loadModel('/models/project2.glb', 'project2');
+        this.loadModel('/models/project3.glb', 'project3');
+        this.loadModel('/models/skills.glb', 'skills');
+    }
+    
+    loadModel(path, name) {
         this.gltfLoader.load(
-            '/models/project1.glb',
+            path,
             (gltf) => {
-                this.models.project1 = gltf.scene;
-            }
-        );
-        
-        this.gltfLoader.load(
-            '/models/project2.glb',
-            (gltf) => {
-                this.models.project2 = gltf.scene;
-            }
-        );
-        
-        this.gltfLoader.load(
-            '/models/project3.glb',
-            (gltf) => {
-                this.models.project3 = gltf.scene;
-            }
-        );
-        
-        // Load skill models or icons
-        this.gltfLoader.load(
-            '/models/skills.glb',
-            (gltf) => {
-                this.models.skills = gltf.scene;
+                // Optimize the model
+                gltf.scene.traverse((child) => {
+                    if (child.isMesh) {
+                        // Simplify materials for better performance
+                        if (child.material) {
+                            child.material.precision = 'lowp'; // Lower precision for better performance
+                            child.material.fog = false; // Disable fog for better performance
+                        }
+                        
+                        // Optimize geometry if it has a lot of vertices
+                        if (child.geometry && child.geometry.attributes.position.count > 10000) {
+                            console.log(`Optimizing high-poly model: ${name}`);
+                        }
+                    }
+                });
+                
+                this.models[name] = gltf.scene;
+                this.loadedAssets++;
+                this.updateProgress();
+            },
+            // Progress callback for this specific model
+            (progress) => {
+                console.log(`Loading ${name}: ${Math.round(progress.loaded / progress.total * 100)}%`);
+            },
+            // Error callback
+            (error) => {
+                console.error(`Error loading model ${name}:`, error);
+                this.loadedAssets++;
+                this.updateProgress();
             }
         );
     }

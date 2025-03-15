@@ -1,97 +1,84 @@
-# Personal Website with Three.js
+# David Vargas - Interactive Portfolio Website
 
-An interactive personal portfolio website built with Three.js, featuring 3D models and animations to showcase projects, skills, and experience.
+A modern, interactive portfolio website showcasing David Vargas's skills, projects, and experience in software development, robotics, and AI.
 
 ## Features
 
-- Interactive 3D environment with particle effects
-- Project showcase with clickable 3D models
-- Skills visualization with interactive elements
-- Smooth camera transitions between sections
-- Responsive design for all devices
+- **Interactive UI**: Modern design with smooth animations and transitions
+- **Particle Background**: Dynamic particle system in the hero section
+- **Code Animation**: Typewriter-style code animation showcasing programming skills
+- **Skills Orbit**: Interactive visualization of skills as orbiting planets
+- **Experience Timeline**: Interactive timeline with robot animation
+- **Interactive Statistics**: Animated statistics with sound effects
+- **Project Showcases**: 3D flip cards for project details
+- **AI Chatbot**: Simple AI assistant to help visitors learn more
+- **Responsive Design**: Fully responsive layout for all devices
+- **Accessibility**: ARIA attributes and keyboard navigation support
+- **Easter Egg**: Hidden matrix animation (click the logo 5 times)
 
 ## Technologies Used
 
-- Three.js for 3D rendering
-- GSAP for animations
-- Vite for development and building
-- Modern JavaScript (ES6+)
+- HTML5
+- CSS3 (with CSS variables and animations)
+- JavaScript (ES6+)
+- Particles.js for background effects
+- Anime.js for animations
+- Typed.js for typing effects
+- Howler.js for sound effects
+- Font Awesome for icons
 
-## Getting Started
+## Setup Instructions
 
-### Prerequisites
+1. Clone the repository:
+   ```
+   git clone https://github.com/yourusername/david-vargas-portfolio.git
+   cd david-vargas-portfolio
+   ```
 
-- Node.js (v14 or higher)
-- npm or yarn
+2. Open the project in your favorite code editor.
 
-### Installation
+3. For local development, you can use a simple HTTP server:
+   ```
+   # If you have Python installed
+   python -m http.server
+   
+   # If you have Node.js installed
+   npx serve
+   ```
 
-1. Clone the repository
-```bash
-git clone https://github.com/yourusername/personal-website-threejs.git
-cd personal-website-threejs
-```
-
-2. Install dependencies
-```bash
-npm install
-# or
-yarn
-```
-
-3. Start the development server
-```bash
-npm run dev
-# or
-yarn dev
-```
-
-4. Open your browser and navigate to `http://localhost:5173`
+4. Open your browser and navigate to `http://localhost:8000` (or the port shown in your terminal).
 
 ## Project Structure
 
 ```
-/
-├── public/                  # Static assets
-│   ├── models/              # 3D models (GLB/GLTF)
-│   ├── textures/            # Textures for materials
-│   └── draco/               # Draco decoder for model compression
+├── index.html              # Main HTML file
 ├── src/
-│   ├── core/                # Core functionality
-│   │   ├── SceneManager.js  # Manages the Three.js scene
-│   │   └── LoadingManager.js # Handles asset loading
-│   ├── subjects/            # Scene subjects (modular components)
-│   │   ├── EnvironmentSubject.js # Background environment
-│   │   ├── ProjectsSubject.js    # Projects section
-│   │   └── SkillsSubject.js      # Skills visualization
-│   ├── styles/              # CSS styles
-│   │   └── main.css         # Main stylesheet
-│   └── main.js              # Entry point
-├── index.html               # HTML template
-├── package.json             # Dependencies and scripts
-└── vite.config.js           # Vite configuration
+│   ├── styles/
+│   │   └── main.css        # Main stylesheet
+│   ├── sounds/             # Sound effect files
+│   ├── particles-config.js # Particles.js configuration
+│   └── main.js             # Main JavaScript file
+└── README.md               # This file
 ```
 
 ## Customization
 
-To customize this website for your own use:
+- **Colors**: Edit the CSS variables in `src/styles/main.css` to change the color scheme
+- **Content**: Update the content in `index.html` to reflect your own information
+- **Particles**: Modify `src/particles-config.js` to change the particle effect
+- **Sounds**: Replace the sound files in `src/sounds/` with your own
 
-1. Replace the placeholder project information in `src/subjects/ProjectsSubject.js`
-2. Update skills in `src/subjects/SkillsSubject.js`
-3. Modify the HTML content in `index.html` to reflect your personal information
-4. Add your own 3D models to the `public/models/` directory
-5. Customize colors and styling in `src/styles/main.css`
+## Browser Support
 
-## Performance Optimization
-
-This project follows Three.js best practices for performance:
-
-- Uses BufferGeometry for all meshes
-- Implements object pooling to reduce garbage collection
-- Optimizes render loop to only render when necessary
-- Implements level of detail (LOD) for complex models
-- Uses Draco compression for 3D models
+- Chrome (latest)
+- Firefox (latest)
+- Safari (latest)
+- Edge (latest)
 
 ## License
 
-MIT
+MIT License
+
+## Contact
+
+David Vargas - david.vargas@example.com

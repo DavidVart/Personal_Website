@@ -3,172 +3,667 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>David Vargas | Interactive Portfolio</title>
+    <meta name="description" content="David Vargas - Computer Science & AI Student, Software Developer, and Robotics Engineer. Portfolio showcasing skills, projects, and experience.">
+    <meta name="keywords" content="David Vargas, software developer, AI, robotics, computer science, portfolio">
+    <title>David Vargas | Portfolio</title>
     <link rel="stylesheet" href="./src/styles/main.css">
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%231A3C5A'/%3E%3Ctext x='50' y='65' font-family='Arial' font-size='50' font-weight='bold' text-anchor='middle' fill='%2300D4B4'%3ED%3C/text%3E%3C/svg%3E">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <!-- Three.js for 3D animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- Particles.js for background effects -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <!-- Anime.js for animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <!-- Typed.js for typing effect -->
+    <script src="https://cdn.jsdelivr.net/npm/typed.js@2.0.12"></script>
+    <!-- Howler.js for sound effects -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"></script>
 </head>
 <body>
-    <canvas class="webgl"></canvas>
-    
-    <div class="loading-bar"></div>
-    
-    <div class="content">
-        <header>
-            <h1 class="title">David Vargas</h1>
-            <nav>
-                <ul>
-                    <li><a href="#about">About</a></li>
-                    <li><a href="#experience">Experience</a></li>
-                    <li><a href="#skills">Skills</a></li>
-                    <li><a href="#projects">Projects</a></li>
-                    <li><a href="#contact">Contact</a></li>
-                </ul>
-            </nav>
-        </header>
-        
-        <section id="about" class="section">
-            <div class="section-content">
-                <h2>About Me</h2>
-                <p class="tagline">Software Developer & Creative Technologist</p>
-                <p>Welcome to my interactive 3D portfolio. I'm David Vargas, a passionate developer with expertise in creating immersive digital experiences. I blend technical skills with creative vision to build innovative solutions.</p>
-                <p>Explore my portfolio by navigating through the sections and interacting with the 3D elements. Click on objects to reveal more information about my experience, skills, and projects.</p>
-                <div class="cta-container">
-                    <a href="#experience" class="cta-button">View Experience</a>
-                    <a href="#contact" class="cta-button secondary">Contact Me</a>
-                </div>
-            </div>
-        </section>
-        
-        <section id="experience" class="section">
-            <div class="section-content">
-                <h2>Experience</h2>
-                <div class="timeline">
-                    <div class="timeline-item">
-                        <div class="timeline-dot"></div>
-                        <div class="timeline-content">
-                            <h3>Senior Software Developer</h3>
-                            <h4>Tech Innovations Inc.</h4>
-                            <p class="timeline-date">2020 - Present</p>
-                            <p>Leading development of web applications using modern JavaScript frameworks. Implementing 3D visualizations and interactive user experiences.</p>
-                        </div>
-                    </div>
-                    <div class="timeline-item">
-                        <div class="timeline-dot"></div>
-                        <div class="timeline-content">
-                            <h3>Full Stack Developer</h3>
-                            <h4>Digital Solutions Group</h4>
-                            <p class="timeline-date">2017 - 2020</p>
-                            <p>Developed responsive web applications and RESTful APIs. Collaborated with design teams to implement interactive UI/UX features.</p>
-                        </div>
-                    </div>
-                    <div class="timeline-item">
-                        <div class="timeline-dot"></div>
-                        <div class="timeline-content">
-                            <h3>Junior Web Developer</h3>
-                            <h4>Creative Web Agency</h4>
-                            <p class="timeline-date">2015 - 2017</p>
-                            <p>Built and maintained client websites. Implemented responsive designs and interactive elements using JavaScript and CSS.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-        
-        <section id="skills" class="section">
-            <div class="section-content">
-                <h2>Skills</h2>
-                <p>My technical skills and expertise visualized in 3D. Click on any skill to learn more about my proficiency and experience with it.</p>
-                <div class="skills-categories">
-                    <div class="skill-category">
-                        <h3>Frontend</h3>
-                        <ul>
-                            <li>JavaScript (ES6+)</li>
-                            <li>React.js</li>
-                            <li>Three.js</li>
-                            <li>HTML5/CSS3</li>
-                        </ul>
-                    </div>
-                    <div class="skill-category">
-                        <h3>Backend</h3>
-                        <ul>
-                            <li>Node.js</li>
-                            <li>Python</li>
-                            <li>SQL/NoSQL</li>
-                            <li>RESTful APIs</li>
-                        </ul>
-                    </div>
-                    <div class="skill-category">
-                        <h3>Tools & Others</h3>
-                        <ul>
-                            <li>Git/GitHub</li>
-                            <li>Docker</li>
-                            <li>AWS</li>
-                            <li>UI/UX Design</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </section>
-        
-        <section id="projects" class="section">
-            <div class="section-content">
-                <h2>Projects</h2>
-                <p>Explore my work by interacting with the 3D models. Click on any project to learn more about the technologies used and my role in its development.</p>
-                <div class="projects-info">
-                    <div class="project-details" id="project1-details">
-                        <h3>Interactive Data Visualization</h3>
-                        <p>A web application that transforms complex datasets into interactive 3D visualizations.</p>
-                        <p><strong>Technologies:</strong> Three.js, D3.js, React, Node.js</p>
-                        <a href="#" class="project-link">View Project</a>
-                    </div>
-                    <div class="project-details" id="project2-details">
-                        <h3>E-Commerce Platform</h3>
-                        <p>A full-featured online shopping platform with real-time inventory management.</p>
-                        <p><strong>Technologies:</strong> React, Redux, Express, MongoDB</p>
-                        <a href="#" class="project-link">View Project</a>
-                    </div>
-                    <div class="project-details" id="project3-details">
-                        <h3>AR Mobile Application</h3>
-                        <p>An augmented reality app that enhances user experience through interactive 3D elements.</p>
-                        <p><strong>Technologies:</strong> Unity, ARKit, C#, Firebase</p>
-                        <a href="#" class="project-link">View Project</a>
-                    </div>
-                </div>
-            </div>
-        </section>
-        
-        <section id="contact" class="section">
-            <div class="section-content">
-                <h2>Contact</h2>
-                <p>Interested in working together? Feel free to reach out through any of the following channels:</p>
-                <div class="contact-info">
-                    <div class="contact-item">
-                        <h3>Email</h3>
-                        <a href="mailto:david.vargas@example.com">david.vargas@example.com</a>
-                    </div>
-                    <div class="contact-item">
-                        <h3>Social</h3>
-                        <div class="contact-links">
-                            <a href="https://github.com/davidvargas" target="_blank">GitHub</a>
-                            <a href="https://linkedin.com/in/davidvargas" target="_blank">LinkedIn</a>
-                            <a href="https://twitter.com/davidvargas" target="_blank">Twitter</a>
-                        </div>
-                    </div>
-                    <div class="contact-item">
-                        <h3>Location</h3>
-                        <p>San Francisco, CA</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-        
-        <footer>
-            <p>&copy; 2023 David Vargas. All rights reserved.</p>
-        </footer>
+    <!-- Loading spinner -->
+    <div class="loading-spinner" aria-live="polite" role="status">
+        <div class="spinner" aria-hidden="true"></div>
+        <p class="loading-text">Loading Portfolio</p>
+        <div class="loading-progress">
+            <div class="loading-progress-bar" id="progress-bar"></div>
+        </div>
     </div>
     
-    <script type="module" src="./src/main.js"></script>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <h1>David Vargas</h1>
+                <p class="tagline">Building the Future with AI & Robotics</p>
+            </div>
+            <nav aria-label="Main navigation">
+                <ul>
+                    <li><a href="#about" class="nav-link" aria-current="page">About</a></li>
+                    <li><a href="#experience" class="nav-link">Experience</a></li>
+                    <li><a href="#skills" class="nav-link">Skills</a></li>
+                    <li><a href="#projects" class="nav-link">Projects</a></li>
+                    <li><a href="#education" class="nav-link">Education</a></li>
+                    <li><a href="#contact" class="nav-link">Contact</a></li>
+                </ul>
+                <button class="mobile-menu-toggle" aria-label="Toggle menu">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </nav>
+        </div>
+    </header>
+    
+    <main>
+        <!-- Hero Section -->
+        <section id="hero" class="hero-section">
+            <div id="particles-js"></div>
+            <div class="container">
+                <div class="hero-content">
+                    <h2 class="fade-in">Hi, I'm David Vargas</h2>
+                    <p class="subtitle fade-in">A Computer Science & AI student passionate about creating impactful tech solutions.</p>
+                    <div class="hero-cta fade-in">
+                        <a href="#experience" class="cta-button">Explore My Work</a>
+                        <a href="#contact" class="cta-button secondary">Get In Touch</a>
+                    </div>
+                </div>
+                <div class="hero-image fade-in">
+                    <div id="robot-container" class="robot-3d-container">
+                        <!-- 3D robot will be rendered here -->
+                        <div id="robot-speech-bubble" class="speech-bubble">
+                            <p>Hi, I'm David's robot assistant! Explore his work below.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="scroll-indicator">
+                <span>Scroll Down</span>
+                <i class="fas fa-chevron-down"></i>
+            </div>
+        </section>
+        
+        <!-- About Section -->
+        <section id="about" class="section">
+            <div class="container">
+                <h2 class="section-title">About Me</h2>
+                <div class="about-content">
+                    <div class="about-text">
+                        <p>I'm a Computer Science and Artificial Intelligence student with a strong background in software development, robotics, and leadership. My passion lies in creating innovative solutions that leverage cutting-edge technology to solve real-world problems.</p>
+                        <p>With experience in full-stack development, AI integration, and robotics engineering, I've led projects from concept to deployment, consistently delivering high-quality results that exceed expectations.</p>
+                        <p>When I'm not coding, you can find me playing competitive football or the piano, activities that help me maintain a creative and balanced perspective.</p>
+                        <p class="find-fours">Can you find the 4s in my journey?</p>
+                    </div>
+                    <div class="about-stats">
+                        <div class="stat-item" id="years-coding" data-sound="typing" data-value="4">
+                            <div class="stat-circle">
+                                <span class="stat-number">?</span>
+                            </div>
+                            <span class="stat-label">Years Coding</span>
+                            <div class="stat-tooltip">I've been coding for 4 years, starting with Python!</div>
+                        </div>
+                        <div class="stat-item" id="projects-completed" data-sound="success" data-value="4">
+                            <div class="stat-circle">
+                                <span class="stat-number">?</span>
+                            </div>
+                            <span class="stat-label">Projects Completed</span>
+                            <div class="stat-tooltip">I've built 4 major projects, including a quadruped robot!</div>
+                        </div>
+                        <div class="stat-item" id="languages-spoken" data-sound="piano" data-value="4">
+                            <div class="stat-circle">
+                                <span class="stat-number">?</span>
+                            </div>
+                            <span class="stat-label">Languages Spoken</span>
+                            <div class="stat-tooltip">I speak 4 languages fluently, including English and Spanish!</div>
+                            <div class="languages-globe">
+                                <i class="fas fa-globe"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="easter-egg-container">
+                    <div class="football"></div>
+                    <div class="piano-keys"></div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Experience Section -->
+        <section id="experience" class="section">
+            <div class="container">
+                <h2 class="section-title">Experience</h2>
+                <div class="timeline-container">
+                    <!-- Robot icon that will move along the timeline -->
+                    <div class="robot-icon">
+                        <div class="robot-body"></div>
+                        <div class="robot-head"></div>
+                        <div class="robot-eye left"></div>
+                        <div class="robot-eye right"></div>
+                        <div class="robot-antenna"></div>
+                    </div>
+                    
+                    <!-- SVG path for the robot to follow -->
+                    <svg class="timeline-path" width="100%" height="100%" preserveAspectRatio="none">
+                        <path d="M50,0 Q70,25 30,50 Q0,75 50,100 Q100,125 50,150 Q0,175 50,200" stroke="#00D4B4" stroke-width="3" fill="none" stroke-dasharray="5,5" />
+                    </svg>
+                    
+                    <div class="timeline">
+                        <div class="timeline-item" data-year="2024">
+                            <div class="timeline-icon">
+                                <i class="fas fa-code"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <h3>Lead Software Developer</h3>
+                                <h4>Jobsi</h4>
+                                <p class="timeline-date">Oct 2024 – Present</p>
+                                <ul>
+                                    <li>Spearheaded a full-stack web app and browser extension, integrating AI APIs to revolutionize job applications.</li>
+                                    <li>Launched a website with 2,000+ users on day one, managing backend infrastructure for user data.</li>
+                                    <li>Implemented responsive design principles and optimized performance for seamless user experience.</li>
+                                </ul>
+                                <button class="fun-fact-button" aria-label="Show fun fact">
+                                    <i class="fas fa-lightbulb"></i>
+                                </button>
+                                <div class="timeline-tooltip">
+                                    <p>Fun Fact: I led a team of 5 developers at Jobsi!</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="timeline-item" data-year="2024">
+                            <div class="timeline-icon">
+                                <i class="fas fa-robot"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <h3>Robotics Engineer</h3>
+                                <h4>Robotics & AI Lab</h4>
+                                <p class="timeline-date">Oct 2024 – Present</p>
+                                <ul>
+                                    <li>Designed a quadruped robot, optimizing movement algorithms with PyTorch and Fusion.</li>
+                                    <li>Led development of three robot versions, achieving a 30% increase in functionality per iteration.</li>
+                                    <li>Implemented remote control capabilities via Raspberry Pi for enhanced usability.</li>
+                                </ul>
+                                <button class="fun-fact-button" aria-label="Show fun fact">
+                                    <i class="fas fa-lightbulb"></i>
+                                </button>
+                                <div class="timeline-tooltip">
+                                    <p>Fun Fact: My robot can navigate stairs and uneven terrain!</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="timeline-item" data-year="2024">
+                            <div class="timeline-icon">
+                                <i class="fas fa-laptop-code"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <h3>Software Engineer Intern</h3>
+                                <h4>Axonius</h4>
+                                <p class="timeline-date">Jun 2024 – Aug 2024</p>
+                                <ul>
+                                    <li>Improved client processes by 20% through data-driven solutions and visualization tools.</li>
+                                    <li>Collaborated with cross-functional teams to identify and implement process improvements.</li>
+                                    <li>Utilized advanced analytics to extract actionable insights from complex datasets.</li>
+                                </ul>
+                                <button class="fun-fact-button" aria-label="Show fun fact">
+                                    <i class="fas fa-lightbulb"></i>
+                                </button>
+                                <div class="timeline-tooltip">
+                                    <p>Fun Fact: My data visualization dashboard is still used by the company today!</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="timeline-item" data-year="2023">
+                            <div class="timeline-icon">
+                                <i class="fas fa-globe"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <h3>Web Intern</h3>
+                                <h4>BProto Organization</h4>
+                                <p class="timeline-date">Aug 2023 – Dec 2023</p>
+                                <ul>
+                                    <li>Revamped a corporate website with JavaScript and Vue.js, enhancing UX.</li>
+                                    <li>Implemented responsive design principles to ensure cross-device compatibility.</li>
+                                    <li>Collaborated with design team to create intuitive user interfaces.</li>
+                                </ul>
+                                <button class="fun-fact-button" aria-label="Show fun fact">
+                                    <i class="fas fa-lightbulb"></i>
+                                </button>
+                                <div class="timeline-tooltip">
+                                    <p>Fun Fact: The website redesign increased user engagement by 40%!</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Skills Section -->
+        <section id="skills" class="section">
+            <div class="container">
+                <h2 class="section-title">Skills</h2>
+                <div class="skills-container">
+                    <div class="skills-category">
+                        <h3>Technical Skills</h3>
+                        <div class="skills-orbit-container">
+                            <div class="ai-core" title="AI Core">
+                                <span>AI</span>
+                            </div>
+                            <!-- Orbits -->
+                            <div class="skill-orbit" style="width: 280px; height: 280px;"></div>
+                            <div class="skill-orbit" style="width: 220px; height: 220px;"></div>
+                            <div class="skill-orbit" style="width: 160px; height: 160px;"></div>
+                            
+                            <!-- Advanced Skills (Inner Orbit) -->
+                            <div class="skill-planet python" style="--orbit-radius: 80px;" title="Python: Used in robotics simulations and AI projects">
+                                <span>Py</span>
+                            </div>
+                            <div class="skill-planet javascript" style="--orbit-radius: 80px;" title="JavaScript: Frontend and backend development">
+                                <span>JS</span>
+                            </div>
+                            <div class="skill-planet cpp" style="--orbit-radius: 80px;" title="C++: Used for robotics and performance-critical applications">
+                                <span>C++</span>
+                            </div>
+                            
+                            <!-- Intermediate Skills (Middle Orbit) -->
+                            <div class="skill-planet vue" style="--orbit-radius: 110px;" title="Vue.js: Frontend framework for web applications">
+                                <span>Vue</span>
+                            </div>
+                            <div class="skill-planet sql" style="--orbit-radius: 110px;" title="SQL: Database management and queries">
+                                <span>SQL</span>
+                            </div>
+                            <div class="skill-planet data" style="--orbit-radius: 110px;" title="Data Analysis: Processing and visualizing complex datasets">
+                                <span>Data</span>
+                            </div>
+                            
+                            <!-- Basic Skills (Outer Orbit) -->
+                            <div class="skill-planet ml" style="--orbit-radius: 140px;" title="Machine Learning: Neural networks and predictive models">
+                                <span>ML</span>
+                            </div>
+                            <div class="skill-planet ba" style="--orbit-radius: 140px;" title="Business Analytics: Extracting insights from business data">
+                                <span>BA</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="skills-category">
+                        <h3>Languages</h3>
+                        <div class="language-grid">
+                            <div class="language-item">
+                                <div class="language-icon">
+                                    <i class="fas fa-flag"></i>
+                                </div>
+                                <div class="language-info">
+                                    <span class="language-name">Spanish</span>
+                                    <span class="language-level">Native</span>
+                                </div>
+                            </div>
+                            <div class="language-item">
+                                <div class="language-icon">
+                                    <i class="fas fa-flag"></i>
+                                </div>
+                                <div class="language-info">
+                                    <span class="language-name">English</span>
+                                    <span class="language-level">Fluent</span>
+                                </div>
+                            </div>
+                            <div class="language-item">
+                                <div class="language-icon">
+                                    <i class="fas fa-flag"></i>
+                                </div>
+                                <div class="language-info">
+                                    <span class="language-name">French</span>
+                                    <span class="language-level">Basic</span>
+                                </div>
+                            </div>
+                            <div class="language-item">
+                                <div class="language-icon">
+                                    <i class="fas fa-flag"></i>
+                                </div>
+                                <div class="language-info">
+                                    <span class="language-name">Hebrew</span>
+                                    <span class="language-level">Basic</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Projects Section -->
+        <section id="projects" class="section">
+            <div class="container">
+                <h2 class="section-title">Projects</h2>
+                <div class="projects-grid">
+                    <div class="project-card">
+                        <div class="project-inner">
+                            <div class="project-front">
+                                <div class="project-image">
+                                    <img src="https://via.placeholder.com/400x300" alt="Quadruped Robot">
+                                </div>
+                                <div class="project-info">
+                                    <h3>Quadruped Robot</h3>
+                                    <p>Built a functional robot with optimized movement algorithms and remote control via Raspberry Pi.</p>
+                                    <div class="project-tech">
+                                        <span>Python</span>
+                                        <span>PyTorch</span>
+                                        <span>Fusion</span>
+                                        <span>Raspberry Pi</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="project-back">
+                                <div class="project-demo" id="robot-demo">
+                                    <!-- Robot animation will be added via JavaScript -->
+                                </div>
+                                <h3>Quadruped Robot</h3>
+                                <p>This project involved designing and building a quadruped robot capable of navigating various terrains.</p>
+                                <p>Hover to see the robot in action!</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="project-card">
+                        <div class="project-inner">
+                            <div class="project-front">
+                                <div class="project-image">
+                                    <img src="https://via.placeholder.com/400x300" alt="Jobsi Web App">
+                                </div>
+                                <div class="project-info">
+                                    <h3>Jobsi Web App</h3>
+                                    <p>Developed a full-stack app with AI integration, attracting 2,000+ users on launch day.</p>
+                                    <div class="project-tech">
+                                        <span>JavaScript</span>
+                                        <span>Vue.js</span>
+                                        <span>Node.js</span>
+                                        <span>AI APIs</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="project-back">
+                                <div class="project-demo" id="jobsi-demo">
+                                    <!-- App interface animation will be added via JavaScript -->
+                                </div>
+                                <h3>Jobsi Web App</h3>
+                                <p>A full-stack web application that revolutionizes the job application process through AI integration.</p>
+                                <p>Hover to see the app interface!</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="project-card">
+                        <div class="project-inner">
+                            <div class="project-front">
+                                <div class="project-image">
+                                    <img src="https://via.placeholder.com/400x300" alt="Data Visualization Tool">
+                                </div>
+                                <div class="project-info">
+                                    <h3>Data Visualization Tool</h3>
+                                    <p>Created interactive dashboards for complex data analysis, improving client decision-making processes.</p>
+                                    <div class="project-tech">
+                                        <span>Python</span>
+                                        <span>D3.js</span>
+                                        <span>SQL</span>
+                                        <span>Grafana</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="project-back">
+                                <div class="project-demo" id="dataviz-demo">
+                                    <!-- Data visualization animation will be added via JavaScript -->
+                                </div>
+                                <h3>Data Visualization Tool</h3>
+                                <p>Interactive dashboards for complex data analysis, enabling clients to make data-driven decisions more efficiently.</p>
+                                <p>Hover to see the visualization in action!</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Education Section -->
+        <section id="education" class="section">
+            <div class="container">
+                <h2 class="section-title">Education & Leadership</h2>
+                <div class="education-leadership-container">
+                    <div class="education-column">
+                        <div class="column-header">
+                            <i class="fas fa-graduation-cap"></i>
+                            <h3>Education</h3>
+                        </div>
+                        <div class="education-item">
+                            <h4>Bachelor's in Computer Science & AI</h4>
+                            <p class="institution">IE University</p>
+                            <p class="edu-date">Expected: July 2026</p>
+                            <p class="edu-gpa">GPA: 8/10</p>
+                            <div class="edu-courses">
+                                <h5>Relevant Courses:</h5>
+                                <ul>
+                                    <li>Machine Learning</li>
+                                    <li>Data Analysis</li>
+                                    <li>Business Analytics</li>
+                                    <li>Algorithms & Data Structures</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="leadership-column">
+                        <div class="column-header">
+                            <i class="fas fa-trophy"></i>
+                            <h3>Leadership</h3>
+                        </div>
+                        <div class="leadership-item">
+                            <h4>Taglit Excel</h4>
+                            <p>10-week leadership program in finance and tech, developing business acumen and networking with industry professionals.</p>
+                        </div>
+                        <div class="leadership-item">
+                            <h4>Young Corporate Program</h4>
+                            <p>Intensive training with KPMG and Telefónica, gaining insights into corporate operations and strategic decision-making.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Contact Section -->
+        <section id="contact" class="section">
+            <div class="container">
+                <h2 class="section-title">Let's Connect</h2>
+                <div class="contact-container">
+                    <div class="contact-info">
+                        <div class="contact-item">
+                            <i class="fas fa-envelope"></i>
+                            <h3>Email</h3>
+                            <a href="mailto:davidvartim@gmail.com">davidvartim@gmail.com</a>
+                        </div>
+                        <div class="contact-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <h3>Location</h3>
+                            <p>Madrid, Spain</p>
+                        </div>
+                        <div class="contact-item">
+                            <i class="fas fa-link"></i>
+                            <h3>Social</h3>
+                            <div class="social-links">
+                                <a href="https://linkedin.com/in/your-profile" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn Profile">
+                                    <i class="fab fa-linkedin"></i>
+                                </a>
+                                <a href="https://github.com/your-username" target="_blank" rel="noopener noreferrer" aria-label="GitHub Profile">
+                                    <i class="fab fa-github"></i>
+                                </a>
+                                <a href="https://twitter.com/your-username" target="_blank" rel="noopener noreferrer" aria-label="Twitter Profile">
+                                    <i class="fab fa-twitter"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-form">
+                        <form id="contactForm">
+                            <div class="form-group">
+                                <label for="name">Name</label>
+                                <input type="text" id="name" name="name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="email">Email</label>
+                                <input type="email" id="email" name="email" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="message">Message</label>
+                                <textarea id="message" name="message" rows="5" required></textarea>
+                            </div>
+                            <button type="submit" class="cta-button">Send Message</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <!-- AI Chatbot -->
+    <div class="chatbot-container">
+        <div class="chatbot-toggle" id="chatbot-toggle">
+            <i class="fas fa-robot"></i>
+        </div>
+        <div class="chatbot-window" id="chatbot-window">
+            <div class="chatbot-header">
+                <span>David's AI Assistant</span>
+                <span class="chatbot-close" id="chatbot-close">&times;</span>
+            </div>
+            <div class="chatbot-messages" id="chatbot-messages">
+                <div class="message bot-message">
+                    Hi! I'm David's AI assistant. Want to know more about his robotics projects?
+                </div>
+            </div>
+            <div class="chatbot-input">
+                <input type="text" id="chatbot-input-field" placeholder="Type your message...">
+                <button id="chatbot-send">Send</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Back to Top Button -->
+    <div class="back-to-top" id="back-to-top">
+        <i class="fas fa-arrow-up"></i>
+    </div>
+    
+    <!-- Easter Egg Container -->
+    <div class="easter-egg" id="easter-egg"></div>
+    
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <p>&copy; 2025 David Vargas. All rights reserved.</p>
+                <div class="footer-social">
+                    <a href="https://linkedin.com/in/your-profile" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn Profile">
+                        <i class="fab fa-linkedin"></i>
+                    </a>
+                    <a href="https://github.com/your-username" target="_blank" rel="noopener noreferrer" aria-label="GitHub Profile">
+                        <i class="fab fa-github"></i>
+                    </a>
+                </div>
+                <p class="footer-note">Built with passion and code</p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Project Modals -->
+    <div class="modal" id="robotModal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>Quadruped Robot</h2>
+            <div class="modal-body">
+                <img src="https://via.placeholder.com/600x400" alt="Quadruped Robot">
+                <h3>Project Overview</h3>
+                <p>Designed and built a functional quadruped robot capable of navigating various terrains through optimized movement algorithms.</p>
+                <h3>Technical Details</h3>
+                <ul>
+                    <li>Implemented movement algorithms using PyTorch for optimization</li>
+                    <li>Designed 3D models with Fusion for structural integrity</li>
+                    <li>Integrated Raspberry Pi for remote control capabilities</li>
+                    <li>Achieved 30% improvement in functionality with each iteration</li>
+                </ul>
+                <h3>Challenges & Solutions</h3>
+                <p>Overcame weight distribution issues by redesigning the chassis and optimizing the power-to-weight ratio. Solved control latency problems through efficient code optimization and hardware upgrades.</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal" id="jobsiModal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>Jobsi Web App</h2>
+            <div class="modal-body">
+                <img src="https://via.placeholder.com/600x400" alt="Jobsi Web App">
+                <h3>Project Overview</h3>
+                <p>Developed a full-stack web application and browser extension that revolutionizes the job application process through AI integration.</p>
+                <h3>Technical Details</h3>
+                <ul>
+                    <li>Built with Vue.js frontend and Node.js backend</li>
+                    <li>Integrated multiple AI APIs for resume analysis and job matching</li>
+                    <li>Implemented secure user authentication and data storage</li>
+                    <li>Designed responsive UI for optimal user experience across devices</li>
+                </ul>
+                <h3>Impact</h3>
+                <p>Launched with over 2,000 users on day one, receiving positive feedback on the intuitive interface and time-saving features. Currently managing backend infrastructure to support growing user base.</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal" id="datavizModal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>Data Visualization Tool</h2>
+            <div class="modal-body">
+                <img src="https://via.placeholder.com/600x400" alt="Data Visualization Tool">
+                <h3>Project Overview</h3>
+                <p>Created interactive dashboards for complex data analysis, enabling clients to make data-driven decisions more efficiently.</p>
+                <h3>Technical Details</h3>
+                <ul>
+                    <li>Utilized D3.js for custom interactive visualizations</li>
+                    <li>Implemented Python backend for data processing</li>
+                    <li>Integrated with SQL databases for real-time data access</li>
+                    <li>Configured Grafana dashboards for monitoring key metrics</li>
+                </ul>
+                <h3>Results</h3>
+                <p>Improved client decision-making processes by 20%, reducing analysis time and increasing accuracy of insights. The tool is now used by multiple departments for strategic planning.</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Main JavaScript -->
+    <script src="src/main.js"></script>
+    <!-- Particles Config -->
+    <script src="src/particles-config.js"></script>
+    <script>
+        // Fallback script to ensure loading spinner disappears
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Fallback script loaded');
+            setTimeout(function() {
+                const loadingSpinner = document.querySelector('.loading-spinner');
+                if (loadingSpinner) {
+                    console.log('Forcing loading spinner to hide after 3 seconds');
+                    loadingSpinner.classList.add('hidden');
+                    setTimeout(function() {
+                        loadingSpinner.style.display = 'none';
+                    }, 500);
+                }
+            }, 3000);
+        });
+    </script>
 </body>
 </html> 
