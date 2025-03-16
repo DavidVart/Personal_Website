@@ -1,5 +1,14 @@
 // Main JavaScript for David Vargas Portfolio
 
+// Debounce utility
+function debounce(func, wait) {
+    let timeout;
+    return function (...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func(...args), wait);
+    };
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM fully loaded and parsed');
     
@@ -14,6 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initSkillsOrbit();
     initTimelineAnimation();
     initInteractiveStats();
+    initMiniGame();
     initChatbot();
     initBackToTop();
     initParticles();
@@ -699,6 +709,513 @@ function initInteractiveStats() {
             }
         });
     });
+}
+
+// Global variable for mini-game
+let currentMiniGameLevel = 1;
+let completedLevels = [];
+
+// Mini-Game functionality
+function initMiniGame() {
+    console.log('Initializing mini-game');
+    
+    const yearsCodingElement = document.getElementById('years-coding');
+    const miniGameModal = document.getElementById('mini-game-modal');
+    const closeModal = document.querySelector('#mini-game-modal .close-modal');
+    const runBtn = document.getElementById('run-btn');
+    const resetBtn = document.getElementById('reset-btn');
+    const hintBtn = document.getElementById('hint-btn');
+    const nextLevelBtn = document.getElementById('next-level-btn');
+    const feedbackElement = document.getElementById('feedback');
+    const hintPanel = document.getElementById('hint-panel');
+    const codeInput = document.getElementById('code-input');
+    const consoleOutput = document.getElementById('console-output');
+    const levelIndicators = document.querySelectorAll('.level-indicator');
+    
+    // Check if all elements exist
+    if (!yearsCodingElement || !miniGameModal || !closeModal || !runBtn || 
+        !resetBtn || !hintBtn || !nextLevelBtn || !feedbackElement || 
+        !hintPanel || !codeInput || !consoleOutput) {
+        console.error('Mini-game elements not found');
+        return;
+    }
+    
+    // Create debounced update function
+    const debouncedUpdateLineNumbers = debounce(() => {
+        updateLineNumbers();
+        applySyntaxHighlighting();
+    }, 100);
+    
+    // Make the Years Coding element clickable
+    yearsCodingElement.style.cursor = 'pointer';
+    
+    // Open mini-game when Years Coding is clicked
+    yearsCodingElement.addEventListener('click', () => {
+        console.log('Years Coding element clicked');
+        openMiniGame();
+    });
+    
+    // Update line numbers when text changes
+    codeInput.addEventListener('input', debouncedUpdateLineNumbers);
+    codeInput.addEventListener('scroll', syncLineNumbersScroll);
+    
+    // Handle tab key and enter key in the code editor
+    codeInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Tab') {
+            e.preventDefault();
+            
+            // Insert 4 spaces at cursor position
+            const selection = window.getSelection();
+            const range = selection.getRangeAt(0);
+            
+            const tabNode = document.createTextNode('    ');
+            range.insertNode(tabNode);
+            
+            // Move cursor after the inserted tab
+            range.setStartAfter(tabNode);
+            range.setEndAfter(tabNode);
+            selection.removeAllRanges();
+            selection.addRange(range);
+            
+            debouncedUpdateLineNumbers();
+        } else if (e.key === 'Enter') {
+            e.preventDefault();
+            
+            // Insert a single line break
+            const selection = window.getSelection();
+            const range = selection.getRangeAt(0);
+            
+            const br = document.createElement('br');
+            range.insertNode(br);
+            
+            // Move cursor after the inserted line break
+            range.setStartAfter(br);
+            range.setEndAfter(br);
+            selection.removeAllRanges();
+            selection.addRange(range);
+            
+            debouncedUpdateLineNumbers();
+        }
+    });
+    
+    // Function to open the mini-game
+    function openMiniGame() {
+        miniGameModal.classList.add('active');
+        updateLevelIndicators();
+        loadLevel(currentMiniGameLevel);
+        try {
+            playSound('click');
+        } catch (error) {
+            console.error('Error playing sound:', error);
+        }
+    }
+    
+    // Close modal when clicking the X
+    closeModal.addEventListener('click', () => {
+        console.log('Close button clicked');
+        miniGameModal.classList.remove('active');
+    });
+    
+    // Close modal when clicking outside the content
+    window.addEventListener('click', (event) => {
+        if (event.target === miniGameModal) {
+            console.log('Clicked outside modal content');
+            miniGameModal.classList.remove('active');
+        }
+    });
+    
+    // Run button functionality
+    runBtn.addEventListener('click', () => {
+        console.log('Run button clicked');
+        runCode();
+    });
+    
+    // Reset button functionality
+    resetBtn.addEventListener('click', () => {
+        console.log('Reset button clicked');
+        resetCode();
+        try {
+            playSound('click');
+        } catch (error) {
+            console.error('Error playing sound:', error);
+        }
+    });
+    
+    // Hint button functionality
+    hintBtn.addEventListener('click', () => {
+        console.log('Hint button clicked');
+        toggleHint();
+        try {
+            playSound('click');
+        } catch (error) {
+            console.error('Error playing sound:', error);
+        }
+    });
+    
+    // Next level button functionality
+    nextLevelBtn.addEventListener('click', () => {
+        console.log('Next level button clicked');
+        if (!completedLevels.includes(currentMiniGameLevel)) {
+            completedLevels.push(currentMiniGameLevel);
+        }
+        currentMiniGameLevel++;
+        loadLevel(currentMiniGameLevel);
+        updateLevelIndicators();
+        nextLevelBtn.style.display = 'none';
+        runBtn.style.display = 'inline-flex';
+        resetBtn.style.display = 'inline-flex';
+        hintBtn.style.display = 'inline-flex';
+        feedbackElement.classList.remove('show', 'success', 'error');
+        hintPanel.classList.remove('show');
+        try {
+            playSound('click');
+        } catch (error) {
+            console.error('Error playing sound:', error);
+        }
+    });
+    
+    // Function to update level indicators
+    function updateLevelIndicators() {
+        levelIndicators.forEach(indicator => {
+            const level = parseInt(indicator.dataset.level);
+            indicator.classList.remove('active', 'completed');
+            
+            if (level === currentMiniGameLevel) {
+                indicator.classList.add('active');
+            } else if (completedLevels.includes(level)) {
+                indicator.classList.add('completed');
+            }
+        });
+    }
+    
+    // Function to update line numbers
+    function updateLineNumbers() {
+        const lines = codeInput.innerText.split('\n');
+        let lineNumbersHTML = '';
+        
+        lines.forEach((_, i) => {
+            lineNumbersHTML += `${i + 1}<br>`;
+        });
+        
+        document.querySelector('.line-numbers').innerHTML = lineNumbersHTML;
+    }
+    
+    // Function to apply syntax highlighting
+    function applySyntaxHighlighting() {
+        if (!codeInput) return;
+        
+        // Get the current code and cursor position
+        const selection = window.getSelection();
+        let range;
+        if (selection.rangeCount > 0) {
+            range = selection.getRangeAt(0).cloneRange();
+        }
+        
+        const code = codeInput.innerText;
+        
+        // Define regex patterns for different syntax elements
+        const patterns = [
+            { type: 'keyword', regex: /\b(if|elif|else|for|while|in|def|return|import|from|as|class|try|except|finally|with|not|and|or|True|False|None)\b/g },
+            { type: 'function', regex: /\b(print|len|range|int|str|float|list|dict|set|tuple|sum|min|max|sorted|map|filter|zip|enumerate|open|input)\b(?=\s*\()/g },
+            { type: 'string', regex: /(["'])((?:\\\1|(?!\1).)*)\1/g },
+            { type: 'number', regex: /\b\d+(?:\.\d+)?\b/g },
+            { type: 'comment', regex: /#.*/g }
+        ];
+        
+        // Apply highlighting
+        let highlightedHTML = code;
+        
+        // Replace each pattern with a span with the appropriate class
+        patterns.forEach(pattern => {
+            highlightedHTML = highlightedHTML.replace(pattern.regex, match => {
+                return `<span class="${pattern.type}">${match}</span>`;
+            });
+        });
+        
+        // Preserve line breaks
+        highlightedHTML = highlightedHTML.replace(/\n/g, '<br>');
+        
+        // Temporarily disable the input event to prevent infinite loop
+        codeInput.removeEventListener('input', debouncedUpdateLineNumbers);
+        
+        // Apply the highlighted HTML
+        codeInput.innerHTML = highlightedHTML;
+        
+        // Restore cursor position (best effort)
+        if (range) {
+            try {
+                selection.removeAllRanges();
+                selection.addRange(range);
+            } catch (e) {
+                console.log('Could not restore cursor position:', e);
+            }
+        }
+        
+        // Re-enable the input event
+        codeInput.addEventListener('input', debouncedUpdateLineNumbers);
+    }
+    
+    // Function to sync line numbers scroll with pre element
+    function syncLineNumbersScroll() {
+        const lineNumbers = document.querySelector('.line-numbers');
+        lineNumbers.scrollTop = codeInput.scrollTop;
+        
+        // Ensure heights match
+        lineNumbers.style.height = `${codeInput.offsetHeight}px`;
+    }
+    
+    // Function to toggle hint
+    function toggleHint() {
+        hintPanel.classList.toggle('show');
+    }
+    
+    // Function to reset code
+    function resetCode() {
+        const defaultCode = getDefaultCode(currentMiniGameLevel);
+        codeInput.innerText = defaultCode;
+        updateLineNumbers();
+        
+        // Reset console
+        consoleOutput.innerHTML = '<span class="console-prompt">&gt;&gt;&gt; </span><span id="console-text">Code reset. Run your code to see the output.</span>';
+        
+        // Hide feedback
+        feedbackElement.classList.remove('show', 'success', 'error');
+    }
+    
+    // Function to get default code for a level
+    function getDefaultCode(level) {
+        switch (level) {
+            case 1:
+                return '# Write code to print "Hello World!"';
+            case 2:
+                return '# Create a variable and print its value';
+            case 3:
+                return '# Check if a number is positive, negative, or zero\nnum = 5';
+            case 4:
+                return '# Calculate the sum of numbers in a list\nnumbers = [1, 2, 3, 4, 5]';
+            default:
+                return '# Write your code here';
+        }
+    }
+    
+    // Function to load a specific level
+    function loadLevel(level) {
+        console.log(`Loading level ${level}`);
+        
+        // Update game content based on level
+        const gameContent = document.getElementById('game-content');
+        const hintText = document.getElementById('hint-text');
+        
+        if (level === 1) {
+            gameContent.innerHTML = `
+                <h4>Year 1 Challenge: Introduction to Python</h4>
+                <p>My coding journey began with the classic first program. Write a Python command to print "Hello World!" to the console.</p>
+            `;
+            hintText.textContent = 'Use the print() function with text in quotes: print("Hello World!")';
+        } else if (level === 2) {
+            gameContent.innerHTML = `
+                <h4>Year 2 Challenge: Variables and Basic Operations</h4>
+                <p>In my second year, I learned about variables. Create a variable with any value and print it to the console.</p>
+            `;
+            hintText.textContent = 'Assign a value to a variable with = and then print it: x = 10; print(x)';
+        } else if (level === 3) {
+            gameContent.innerHTML = `
+                <h4>Year 3 Challenge: Conditional Statements</h4>
+                <p>Write a program to check if the variable "num" is positive, negative, or zero, and print the result.</p>
+            `;
+            hintText.textContent = 'Use if, elif, and else to check conditions: if num > 0: print("Positive")';
+        } else if (level === 4) {
+            gameContent.innerHTML = `
+                <h4>Year 4 Challenge: Loops and Lists</h4>
+                <p>Calculate and print the sum of all numbers in the given list using a loop.</p>
+            `;
+            hintText.textContent = 'Use a for loop to iterate through the list and add each number to a total variable.';
+        }
+        
+        // Set default code
+        codeInput.innerText = getDefaultCode(level);
+        debouncedUpdateLineNumbers();
+        
+        // Reset console
+        consoleOutput.innerHTML = '<span class="console-prompt">&gt;&gt;&gt; </span><span id="console-text">Write and run your code to see the output.</span>';
+        
+        // Focus on code input
+        codeInput.focus();
+    }
+    
+    // Function to run code
+    function runCode() {
+        const code = codeInput.innerText.trim();
+        console.log(`Running code: ${code}`);
+        
+        // Clear previous feedback
+        feedbackElement.classList.remove('show', 'success', 'error');
+        
+        try {
+            // Simulate code execution based on level
+            let output = '';
+            let isCorrect = false;
+            
+            if (currentMiniGameLevel === 1) {
+                // Year 1: Print "Hello World!"
+                if (code.includes('print') && (code.includes('"Hello World!"') || code.includes("'Hello World!'"))) {
+                    output = 'Hello World!';
+                    isCorrect = true;
+                } else if (code.includes('print')) {
+                    // They used print but with wrong text
+                    const match = code.match(/print\s*\(\s*["'](.*)["']\s*\)/);
+                    if (match && match[1]) {
+                        output = match[1];
+                    } else {
+                        output = 'Error: SyntaxError: invalid syntax';
+                    }
+                } else {
+                    output = 'Error: Did you forget to use the print() function?';
+                }
+            } else if (currentMiniGameLevel === 2) {
+                // Year 2: Variables and printing
+                const variableAssignment = /\w+\s*=\s*[^=]+/.test(code);
+                const printStatement = /print\s*\(\s*\w+\s*\)/.test(code);
+                
+                if (variableAssignment && printStatement) {
+                    // Extract variable name and value
+                    const varMatch = code.match(/(\w+)\s*=\s*([^=;]+)/);
+                    if (varMatch) {
+                        const varName = varMatch[1];
+                        let varValue = varMatch[2].trim();
+                        
+                        // Check if value is a string
+                        if ((varValue.startsWith('"') && varValue.endsWith('"')) || 
+                            (varValue.startsWith("'") && varValue.endsWith("'"))) {
+                            varValue = varValue.substring(1, varValue.length - 1);
+                        }
+                        
+                        output = varValue;
+                        isCorrect = true;
+                    } else {
+                        output = 'Error: Could not parse variable assignment';
+                    }
+                } else if (variableAssignment) {
+                    output = 'Error: You assigned a variable but didn\'t print it';
+                } else if (printStatement) {
+                    output = 'Error: NameError: name is not defined';
+                } else {
+                    output = 'Error: Your code should assign a variable and print it';
+                }
+            } else if (currentMiniGameLevel === 3) {
+                // Year 3: Conditional statements
+                const hasIfStatement = /if\s+num\s*>/.test(code);
+                const hasElseIfStatement = /elif\s+num\s*</.test(code) || /else\s+if\s+num\s*</.test(code);
+                const hasElseStatement = /else\s*:/.test(code);
+                const hasPrintPositive = /print\s*\(\s*["']Positive["']\s*\)/.test(code);
+                const hasPrintNegative = /print\s*\(\s*["']Negative["']\s*\)/.test(code);
+                const hasPrintZero = /print\s*\(\s*["']Zero["']\s*\)/.test(code);
+                
+                if (hasIfStatement && (hasElseIfStatement || hasElseStatement) && 
+                    (hasPrintPositive || hasPrintNegative || hasPrintZero)) {
+                    output = 'Positive';  // Since num = 5 in the default code
+                    isCorrect = true;
+                } else if (hasIfStatement) {
+                    output = 'Partial solution: You have the if statement, but need to handle all cases (positive, negative, zero)';
+                } else {
+                    output = 'Error: Your code should use if/elif/else to check if num is positive, negative, or zero';
+                }
+            } else if (currentMiniGameLevel === 4) {
+                // Year 4: Loops and lists
+                const hasForLoop = /for\s+\w+\s+in\s+numbers/.test(code);
+                const hasTotalVariable = /total\s*=\s*0/.test(code) || /sum\s*=\s*0/.test(code);
+                const hasAddition = /total\s*\+=/.test(code) || /sum\s*\+=/.test(code) || /total\s*=\s*total\s*\+/.test(code);
+                const hasPrintTotal = /print\s*\(\s*total\s*\)/.test(code) || /print\s*\(\s*sum\s*\)/.test(code);
+                
+                if (hasForLoop && hasTotalVariable && hasAddition && hasPrintTotal) {
+                    output = '15';  // Sum of [1, 2, 3, 4, 5]
+                    isCorrect = true;
+                } else if (hasForLoop && hasTotalVariable) {
+                    output = 'Partial solution: You have the loop and total variable, but need to add each number and print the result';
+                } else if (hasForLoop) {
+                    output = 'Partial solution: You have the loop, but need to initialize a total variable, add each number, and print the result';
+                } else {
+                    output = 'Error: Your code should use a for loop to iterate through the list and calculate the sum';
+                }
+            }
+            
+            // Update console output
+            if (output.startsWith('Error:')) {
+                consoleOutput.innerHTML = `<span class="console-prompt">&gt;&gt;&gt; </span><span class="console-error">${output}</span>`;
+            } else {
+                consoleOutput.innerHTML = `<span class="console-prompt">&gt;&gt;&gt; </span><span class="console-success">${output}</span>`;
+            }
+            
+            // Show feedback if correct
+            if (isCorrect) {
+                feedbackElement.textContent = getLevelSuccessMessage(currentMiniGameLevel);
+                feedbackElement.classList.add('show', 'success');
+                
+                // Show next level button
+                nextLevelBtn.style.display = 'inline-flex';
+                runBtn.style.display = 'none';
+                resetBtn.style.display = 'none';
+                hintBtn.style.display = 'none';
+                
+                // Play success sound
+                try {
+                    playSound('success');
+                } catch (error) {
+                    console.error('Error playing sound:', error);
+                }
+                
+                // Add to completed levels if not already there
+                if (!completedLevels.includes(currentMiniGameLevel)) {
+                    completedLevels.push(currentMiniGameLevel);
+                    updateLevelIndicators();
+                }
+            } else {
+                // Play error sound if output contains error
+                if (output.startsWith('Error:')) {
+                    try {
+                        playSound('error');
+                    } catch (error) {
+                        console.error('Error playing sound:', error);
+                    }
+                } else {
+                    try {
+                        playSound('click');
+                    } catch (error) {
+                        console.error('Error playing sound:', error);
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('Error running code:', error);
+            consoleOutput.innerHTML = `<span class="console-prompt">&gt;&gt;&gt; </span><span class="console-error">Error: ${error.message}</span>`;
+            
+            try {
+                playSound('error');
+            } catch (soundError) {
+                console.error('Error playing sound:', soundError);
+            }
+        }
+    }
+    
+    // Function to get success message for a level
+    function getLevelSuccessMessage(level) {
+        switch (level) {
+            case 1:
+                return 'Great job! You\'ve successfully printed "Hello World!" to the console. This is the first step in every programmer\'s journey.';
+            case 2:
+                return 'Excellent! You\'ve created a variable and printed its value. Variables are fundamental building blocks in programming.';
+            case 3:
+                return 'Well done! You\'ve mastered conditional statements, which are essential for decision-making in programs.';
+            case 4:
+                return 'Amazing! You\'ve successfully used loops to process data in a list. This is a powerful technique used in data processing.';
+            default:
+                return 'Congratulations! You\'ve completed this level successfully.';
+        }
+    }
+    
+    // Initialize the mini-game
+    updateLevelIndicators();
+    console.log('Mini-game initialization completed');
 }
 
 // Chatbot functionality
@@ -1444,10 +1961,117 @@ function initParticles() {
         return;
     }
     
-    // Load particles.js config
-    particlesJS.load('particles-js', 'src/particles-config.js', function() {
-        console.log('Particles.js loaded');
-    });
+    try {
+        // Use the configuration directly instead of loading from a file
+        particlesJS('particles-js', {
+            "particles": {
+                "number": {
+                    "value": 60,
+                    "density": {
+                        "enable": true,
+                        "value_area": 900
+                    }
+                },
+                "color": {
+                    "value": "#00D4B4"
+                },
+                "shape": {
+                    "type": "circle",
+                    "stroke": {
+                        "width": 0,
+                        "color": "#000000"
+                    },
+                    "polygon": {
+                        "nb_sides": 5
+                    }
+                },
+                "opacity": {
+                    "value": 0.4,
+                    "random": true,
+                    "anim": {
+                        "enable": true,
+                        "speed": 0.6,
+                        "opacity_min": 0.1,
+                        "sync": false
+                    }
+                },
+                "size": {
+                    "value": 2.5,
+                    "random": true,
+                    "anim": {
+                        "enable": false,
+                        "speed": 40,
+                        "size_min": 0.1,
+                        "sync": false
+                    }
+                },
+                "line_linked": {
+                    "enable": true,
+                    "distance": 180,
+                    "color": "#1A3C5A",
+                    "opacity": 0.3,
+                    "width": 1
+                },
+                "move": {
+                    "enable": true,
+                    "speed": 1.5,
+                    "direction": "none",
+                    "random": true,
+                    "straight": false,
+                    "out_mode": "out",
+                    "bounce": false,
+                    "attract": {
+                        "enable": true,
+                        "rotateX": 600,
+                        "rotateY": 1200
+                    }
+                }
+            },
+            "interactivity": {
+                "detect_on": "canvas",
+                "events": {
+                    "onhover": {
+                        "enable": true,
+                        "mode": "grab"
+                    },
+                    "onclick": {
+                        "enable": true,
+                        "mode": "push"
+                    },
+                    "resize": true
+                },
+                "modes": {
+                    "grab": {
+                        "distance": 180,
+                        "line_linked": {
+                            "opacity": 0.8
+                        }
+                    },
+                    "bubble": {
+                        "distance": 400,
+                        "size": 40,
+                        "duration": 2,
+                        "opacity": 8,
+                        "speed": 3
+                    },
+                    "repulse": {
+                        "distance": 150,
+                        "duration": 0.4
+                    },
+                    "push": {
+                        "particles_nb": 4
+                    },
+                    "remove": {
+                        "particles_nb": 2
+                    }
+                }
+            },
+            "retina_detect": true
+        });
+        console.log('Particles.js initialized successfully');
+    } catch (error) {
+        console.error('Error initializing particles.js:', error);
+    }
 }
 
 // Easter egg functionality
@@ -2099,7 +2723,9 @@ function playSound(soundName, volume = 0.3) {
         'piano': 'src/sounds/piano.mp3',
         'beep': 'src/sounds/beep.mp3',
         'pop': 'src/sounds/pop.mp3',
-        'kick': 'src/sounds/kick.mp3'
+        'kick': 'src/sounds/kick.mp3',
+        'click': 'src/sounds/pop.mp3',
+        'error': 'src/sounds/beep.mp3'
     };
     
     // Check if the sound exists

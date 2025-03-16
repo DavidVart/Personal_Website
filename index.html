@@ -97,7 +97,7 @@
                         <p class="find-fours">Can you find the 4s in my journey?</p>
                     </div>
                     <div class="about-stats">
-                        <div class="stat-item" id="years-coding" data-sound="typing" data-value="4">
+                        <div class="stat-item" id="years-coding" data-sound="typing" data-value="4" style="cursor: pointer;" onclick="document.getElementById('mini-game-modal').classList.add('active'); console.log('Years Coding clicked via HTML'); if (typeof loadMiniGameLevel === 'function') { loadMiniGameLevel(1); }">
                             <div class="stat-circle">
                                 <span class="stat-number">?</span>
                             </div>
@@ -644,10 +644,65 @@
         </div>
     </div>
     
-    <!-- Main JavaScript -->
+    <!-- Mini-Game Modal -->
+    <div id="mini-game-modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>My Coding Journey</h3>
+                <span class="close-modal" onclick="document.getElementById('mini-game-modal').classList.remove('active'); console.log('Close button clicked via HTML');">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="level-progress">
+                    <div class="level-indicator" data-level="1">
+                        <div class="level-number">1</div>
+                        <div class="level-label">Year 1</div>
+                    </div>
+                    <div class="level-indicator" data-level="2">
+                        <div class="level-number">2</div>
+                        <div class="level-label">Year 2</div>
+                    </div>
+                    <div class="level-indicator" data-level="3">
+                        <div class="level-number">3</div>
+                        <div class="level-label">Year 3</div>
+                    </div>
+                    <div class="level-indicator" data-level="4">
+                        <div class="level-number">4</div>
+                        <div class="level-label">Year 4</div>
+                    </div>
+                </div>
+                
+                <div id="game-content">
+                    <!-- Challenge description will be inserted here -->
+                </div>
+                
+                <div class="code-environment">
+                    <div class="code-editor">
+                        <div class="line-numbers">1</div>
+                        <pre id="code-input" class="code-input" contenteditable="true" spellcheck="false"># Write code to print "Hello World!"</pre>
+                    </div>
+                    <div class="console-output" id="console-output">
+                        <span class="console-prompt">&gt;&gt;&gt; </span><span id="console-text">Welcome to the Python console! Run your code to see the output.</span>
+                    </div>
+                </div>
+                
+                <div id="game-controls">
+                    <button id="run-btn" class="btn"><i class="fas fa-play"></i> Run Code</button>
+                    <button id="reset-btn" class="btn btn-secondary"><i class="fas fa-undo"></i> Reset</button>
+                    <button id="hint-btn" class="btn btn-secondary"><i class="fas fa-lightbulb"></i> Hint</button>
+                    <button id="next-level-btn" class="btn" style="display: none;"><i class="fas fa-arrow-right"></i> Next Level</button>
+                </div>
+                
+                <div id="feedback" class="feedback"></div>
+                
+                <div class="hint-panel" id="hint-panel">
+                    <h4><i class="fas fa-lightbulb"></i> Hint</h4>
+                    <p id="hint-text">Try using the print() function with your text in quotes.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="src/main.js"></script>
-    <!-- Particles Config -->
-    <script src="src/particles-config.js"></script>
     <script>
         // Fallback script to ensure loading spinner disappears
         document.addEventListener('DOMContentLoaded', function() {

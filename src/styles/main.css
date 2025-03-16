@@ -1122,6 +1122,322 @@ nav ul li {
     margin-bottom: 0.5rem;
 }
 
+/* Mini-Game Modal Styles */
+#mini-game-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: 2000;
+    justify-content: center;
+    align-items: center;
+}
+
+#mini-game-modal.active {
+    display: flex !important;
+}
+
+#mini-game-modal .modal-content {
+    background-color: #1E1E1E;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+    width: 90%;
+    max-width: 800px;
+    position: relative;
+    animation: modalFadeIn 0.3s ease-out;
+    overflow: visible;
+    margin: 0;
+    color: #E0E0E0;
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+#mini-game-modal .modal-header {
+    padding: 15px 20px;
+    border-bottom: 1px solid #333;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #26A69A;
+    color: white;
+    border-radius: 10px 10px 0 0;
+}
+
+#mini-game-modal .modal-header h3 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+#mini-game-modal .close-modal {
+    position: static;
+    font-size: 1.8rem;
+    font-weight: bold;
+    cursor: pointer;
+    color: white;
+}
+
+#mini-game-modal .close-modal:hover {
+    color: #ddd;
+}
+
+#mini-game-modal .modal-body {
+    padding: 20px;
+}
+
+/* Progress tracking */
+.level-progress {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    padding: 10px;
+    background-color: #252525;
+    border-radius: 5px;
+}
+
+.level-indicator {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    opacity: 0.5;
+    transition: opacity 0.3s;
+}
+
+.level-indicator.active {
+    opacity: 1;
+}
+
+.level-indicator.completed {
+    opacity: 1;
+    color: #26A69A;
+}
+
+.level-indicator .level-number {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.level-indicator.active .level-number {
+    background-color: #26A69A;
+    color: white;
+}
+
+.level-indicator.completed .level-number {
+    background-color: #26A69A;
+    color: white;
+}
+
+.level-indicator .level-label {
+    font-size: 0.8rem;
+}
+
+/* Code editor and console */
+.code-environment {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.code-editor {
+    background-color: #252525;
+    border-radius: 5px;
+    padding: 10px;
+    position: relative;
+    min-height: 150px;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #E0E0E0;
+    display: flex;
+}
+
+.line-numbers {
+    width: 30px;
+    padding: 10px 5px;
+    background-color: #1E1E1E;
+    color: #666;
+    text-align: right;
+    user-select: none;
+    border-right: 1px solid #333;
+    line-height: 1.5;
+    overflow: hidden;
+}
+
+.code-input {
+    width: 100%;
+    min-height: 150px;
+    background-color: transparent;
+    border: none;
+    color: #E0E0E0;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 14px;
+    line-height: 1.5;
+    padding: 10px 10px 10px 10px;
+    white-space: pre-wrap;
+    overflow-y: auto;
+    outline: none;
+    flex: 1;
+    margin: 0;
+    tab-size: 4;
+}
+
+.code-input:focus {
+    outline: none;
+}
+
+.console-output {
+    background-color: #0F0F0F;
+    border-radius: 5px;
+    padding: 15px;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #E0E0E0;
+    min-height: 100px;
+    max-height: 150px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+}
+
+.console-prompt {
+    color: #26A69A;
+    font-weight: bold;
+}
+
+.console-error {
+    color: #FF5252;
+}
+
+.console-success {
+    color: #4CAF50;
+}
+
+/* Syntax highlighting */
+.keyword {
+    color: #569CD6;
+}
+
+.string {
+    color: #CE9178;
+}
+
+.function {
+    color: #DCDCAA;
+}
+
+.number {
+    color: #B5CEA8;
+}
+
+.comment {
+    color: #6A9955;
+    font-style: italic;
+}
+
+/* Controls */
+#game-controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+#mini-game-modal .btn {
+    background-color: #26A69A;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+#mini-game-modal .btn:hover {
+    background-color: #1E8A7D;
+}
+
+#mini-game-modal .btn-secondary {
+    background-color: #555;
+}
+
+#mini-game-modal .btn-secondary:hover {
+    background-color: #444;
+}
+
+#mini-game-modal .btn i {
+    font-size: 0.9rem;
+}
+
+#feedback {
+    text-align: center;
+    font-weight: bold;
+    min-height: 24px;
+    margin-top: 15px;
+    padding: 10px;
+    border-radius: 5px;
+    background-color: #252525;
+    display: none;
+}
+
+#feedback.show {
+    display: block;
+}
+
+#feedback.success {
+    background-color: rgba(76, 175, 80, 0.2);
+    color: #4CAF50;
+}
+
+#feedback.error {
+    background-color: rgba(255, 82, 82, 0.2);
+    color: #FF5252;
+}
+
+/* Hint panel */
+.hint-panel {
+    background-color: #252525;
+    border-left: 4px solid #26A69A;
+    padding: 15px;
+    margin-top: 15px;
+    border-radius: 0 5px 5px 0;
+    display: none;
+}
+
+.hint-panel.show {
+    display: block;
+}
+
+.hint-panel h4 {
+    margin-top: 0;
+    color: #26A69A;
+}
+
+.hint-panel p {
+    margin-bottom: 0;
+}
+
 /* Loading Spinner */
 .loading-spinner {
     position: fixed;
