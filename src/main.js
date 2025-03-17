@@ -759,42 +759,105 @@ function initMiniGame() {
     codeInput.addEventListener('input', debouncedUpdateLineNumbers);
     codeInput.addEventListener('scroll', syncLineNumbersScroll);
     
-    // Handle tab key and enter key in the code editor
+    // Handle paste events to ensure plain text is pasted
+    codeInput.addEventListener('paste', function(e) {
+        e.preventDefault();
+        
+        // Get plain text from clipboard
+        const text = e.clipboardData.getData('text/plain');
+        
+        // Insert the plain text at cursor position
+        document.execCommand('insertText', false, text);
+        
+        // Update line numbers and syntax highlighting
+        debouncedUpdateLineNumbers();
+    });
+    
+    // Handle tab key, enter key, and space key in the code editor
     codeInput.addEventListener('keydown', function(e) {
         if (e.key === 'Tab') {
             e.preventDefault();
             
-            // Insert 4 spaces at cursor position
-            const selection = window.getSelection();
-            const range = selection.getRangeAt(0);
+            // Insert 4 spaces using execCommand for better cursor handling
+            document.execCommand('insertText', false, '    ');
             
-            const tabNode = document.createTextNode('    ');
-            range.insertNode(tabNode);
-            
-            // Move cursor after the inserted tab
-            range.setStartAfter(tabNode);
-            range.setEndAfter(tabNode);
-            selection.removeAllRanges();
-            selection.addRange(range);
-            
+            // Update line numbers and syntax highlighting
             debouncedUpdateLineNumbers();
         } else if (e.key === 'Enter') {
             e.preventDefault();
             
-            // Insert a single line break
+            // Store the current cursor position
             const selection = window.getSelection();
-            const range = selection.getRangeAt(0);
+            let cursorPosition = 0;
+            if (selection.rangeCount > 0) {
+                const range = selection.getRangeAt(0);
+                const preSelectionRange = range.cloneRange();
+                preSelectionRange.selectNodeContents(codeInput);
+                preSelectionRange.setEnd(range.startContainer, range.startOffset);
+                cursorPosition = preSelectionRange.toString().length;
+            }
             
-            const br = document.createElement('br');
-            range.insertNode(br);
+            // Check for auto-indentation - determine if current line ends with colon BEFORE adding new line
+            const lines = codeInput.innerText.split('\n');
+            const currentLineIndex = lines.findIndex((line, index) => {
+                const lineStart = lines.slice(0, index).join('\n').length + (index > 0 ? 1 : 0);
+                const lineEnd = lineStart + line.length;
+                return cursorPosition >= lineStart && cursorPosition <= lineEnd;
+            });
             
-            // Move cursor after the inserted line break
-            range.setStartAfter(br);
-            range.setEndAfter(br);
-            selection.removeAllRanges();
-            selection.addRange(range);
+            const shouldAutoIndent = currentLineIndex >= 0 && lines[currentLineIndex].trim().endsWith(':');
             
-            debouncedUpdateLineNumbers();
+            // Insert a proper line break FIRST
+            document.execCommand('insertLineBreak');
+            
+            // Find the inserted <br> element and ensure there's a text node after it
+            setTimeout(() => {
+                const brElements = codeInput.querySelectorAll('br');
+                const lastBr = brElements[brElements.length - 1];
+                
+                if (lastBr) {
+                    // Ensure there's a text node after the <br> for the cursor
+                    let nextNode = lastBr.nextSibling;
+                    if (!nextNode || nextNode.nodeType !== Node.TEXT_NODE) {
+                        nextNode = document.createTextNode('');
+                        lastBr.parentNode.insertBefore(nextNode, lastBr.nextSibling);
+                    }
+                    
+                    // Position cursor at the start of the new line FIRST
+                    const range = document.createRange();
+                    range.setStart(nextNode, 0);
+                    range.setEnd(nextNode, 0);
+                    selection.removeAllRanges();
+                    selection.addRange(range);
+                    
+                    // THEN apply auto-indentation to the new line if needed
+                    if (shouldAutoIndent) {
+                        document.execCommand('insertText', false, '    ');
+                    }
+                    
+                    // Update line numbers and syntax highlighting after all DOM changes
+                    setTimeout(() => {
+                        updateLineNumbers();
+                        applySyntaxHighlighting();
+                        
+                        // Final cursor position adjustment
+                        const newCursorPosition = cursorPosition + 1 + (shouldAutoIndent ? 4 : 0);
+                        setTimeout(() => {
+                            setCursorPosition(codeInput, newCursorPosition);
+                        }, 10);
+                    }, 10);
+                } else {
+                    debouncedUpdateLineNumbers();
+                }
+            }, 10);
+        } else if (e.key === ' ') {
+            e.preventDefault();
+            
+            // Insert a space using execCommand for better cursor handling
+            document.execCommand('insertText', false, ' ');
+            
+            // No need to update line numbers for space, but update syntax highlighting
+            applySyntaxHighlighting();
         }
     });
     
@@ -890,65 +953,164 @@ function initMiniGame() {
     
     // Function to update line numbers
     function updateLineNumbers() {
+        // Count lines based on innerText split by newlines
         const lines = codeInput.innerText.split('\n');
+        let lineCount = lines.length;
+        
+        // Adjust for trailing empty lines (if the last line is empty, don't count it as an extra line)
+        if (lines[lines.length - 1].trim() === '' && lines.length > 1) {
+            lineCount--;
+        }
+        
+        // Ensure at least one line
+        lineCount = Math.max(1, lineCount);
+        
+        // Generate line numbers
         let lineNumbersHTML = '';
+        for (let i = 1; i <= lineCount; i++) {
+            lineNumbersHTML += `${i}<br>`;
+        }
         
-        lines.forEach((_, i) => {
-            lineNumbersHTML += `${i + 1}<br>`;
-        });
+        const lineNumbersDiv = document.querySelector('.line-numbers');
+        lineNumbersDiv.innerHTML = lineNumbersHTML;
         
-        document.querySelector('.line-numbers').innerHTML = lineNumbersHTML;
+        // Sync heights and scroll position
+        lineNumbersDiv.style.height = `${codeInput.offsetHeight}px`;
+        lineNumbersDiv.scrollTop = codeInput.scrollTop;
     }
     
     // Function to apply syntax highlighting
     function applySyntaxHighlighting() {
         if (!codeInput) return;
         
-        // Get the current code and cursor position
+        // Store cursor position
         const selection = window.getSelection();
-        let range;
+        let cursorPosition = 0;
+        
         if (selection.rangeCount > 0) {
-            range = selection.getRangeAt(0).cloneRange();
+            const range = selection.getRangeAt(0);
+            const preSelectionRange = range.cloneRange();
+            preSelectionRange.selectNodeContents(codeInput);
+            preSelectionRange.setEnd(range.startContainer, range.startOffset);
+            cursorPosition = preSelectionRange.toString().length;
         }
         
+        // Get the plain text content
         const code = codeInput.innerText;
         
-        // Define regex patterns for different syntax elements
-        const patterns = [
-            { type: 'keyword', regex: /\b(if|elif|else|for|while|in|def|return|import|from|as|class|try|except|finally|with|not|and|or|True|False|None)\b/g },
-            { type: 'function', regex: /\b(print|len|range|int|str|float|list|dict|set|tuple|sum|min|max|sorted|map|filter|zip|enumerate|open|input)\b(?=\s*\()/g },
-            { type: 'string', regex: /(["'])((?:\\\1|(?!\1).)*)\1/g },
-            { type: 'number', regex: /\b\d+(?:\.\d+)?\b/g },
-            { type: 'comment', regex: /#.*/g }
-        ];
+        // Create a document fragment
+        const fragment = document.createDocumentFragment();
+        const lines = code.split('\n');
         
-        // Apply highlighting
-        let highlightedHTML = code;
-        
-        // Replace each pattern with a span with the appropriate class
-        patterns.forEach(pattern => {
-            highlightedHTML = highlightedHTML.replace(pattern.regex, match => {
-                return `<span class="${pattern.type}">${match}</span>`;
+        // Process each line separately to maintain line breaks
+        lines.forEach((line, lineIndex) => {
+            // Handle empty lines - create an explicit empty text node to ensure cursor can be placed there
+            if (line.trim() === '') {
+                const emptyNode = document.createTextNode('');
+                fragment.appendChild(emptyNode);
+                
+                // Add a line break if this isn't the last line
+                if (lineIndex < lines.length - 1) {
+                    fragment.appendChild(document.createElement('br'));
+                }
+                return;
+            }
+            
+            // Create a temporary div to hold the highlighted line
+            const tempDiv = document.createElement('div');
+            tempDiv.style.display = 'inline';
+            
+            // Apply syntax highlighting to this line
+            let highlightedLine = line;
+            
+            // Define regex patterns for different syntax elements
+            const patterns = [
+                { type: 'keyword', regex: /\b(if|elif|else|for|while|in|def|return|import|from|as|class|try|except|finally|with|not|and|or|True|False|None)\b/g },
+                { type: 'function', regex: /\b(print|len|range|int|str|float|list|dict|set|tuple|sum|min|max|sorted|map|filter|zip|enumerate|open|input)\b(?=\s*\()/g },
+                { type: 'string', regex: /(["'])((?:\\\1|(?!\1).)*)\1/g },
+                { type: 'number', regex: /\b\d+(?:\.\d+)?\b/g },
+                { type: 'comment', regex: /#.*/g }
+            ];
+            
+            // Apply each pattern
+            let lastIndex = 0;
+            let segments = [];
+            
+            // Find all matches from all patterns and store them
+            patterns.forEach(pattern => {
+                const regex = new RegExp(pattern.regex.source, 'g');
+                let match;
+                while ((match = regex.exec(line)) !== null) {
+                    segments.push({
+                        index: match.index,
+                        text: match[0],
+                        type: pattern.type,
+                        end: match.index + match[0].length
+                    });
+                }
             });
+            
+            // Sort segments by start index
+            segments.sort((a, b) => a.index - b.index);
+            
+            // Filter out overlapping segments (keep the first one)
+            const finalSegments = [];
+            for (let i = 0; i < segments.length; i++) {
+                if (i === 0 || segments[i].index >= finalSegments[finalSegments.length - 1].end) {
+                    finalSegments.push(segments[i]);
+                }
+            }
+            
+            // Process line with segments
+            let processedText = '';
+            let currentIndex = 0;
+            
+            finalSegments.forEach(segment => {
+                // Add any plain text before this segment
+                if (segment.index > currentIndex) {
+                    const plainText = line.substring(currentIndex, segment.index);
+                    tempDiv.appendChild(document.createTextNode(plainText));
+                }
+                
+                // Add the segment with appropriate styling
+                if (segment.type !== 'plain') {
+                    const span = document.createElement('span');
+                    span.className = segment.type;
+                    span.textContent = segment.text;
+                    tempDiv.appendChild(span);
+                } else {
+                    tempDiv.appendChild(document.createTextNode(segment.text));
+                }
+                
+                currentIndex = segment.index + segment.text.length;
+            });
+            
+            // Add any remaining text
+            if (currentIndex < line.length) {
+                tempDiv.appendChild(document.createTextNode(line.substring(currentIndex)));
+            }
+            
+            // Append the highlighted line to the fragment
+            while (tempDiv.firstChild) {
+                fragment.appendChild(tempDiv.firstChild);
+            }
+            
+            // Add a line break if this isn't the last line
+            if (lineIndex < lines.length - 1) {
+                fragment.appendChild(document.createElement('br'));
+            }
         });
-        
-        // Preserve line breaks
-        highlightedHTML = highlightedHTML.replace(/\n/g, '<br>');
         
         // Temporarily disable the input event to prevent infinite loop
         codeInput.removeEventListener('input', debouncedUpdateLineNumbers);
         
-        // Apply the highlighted HTML
-        codeInput.innerHTML = highlightedHTML;
+        // Clear the current content and add the new content
+        codeInput.innerHTML = '';
+        codeInput.appendChild(fragment);
         
-        // Restore cursor position (best effort)
-        if (range) {
-            try {
-                selection.removeAllRanges();
-                selection.addRange(range);
-            } catch (e) {
-                console.log('Could not restore cursor position:', e);
-            }
+        // Restore cursor position
+        if (cursorPosition > 0) {
+            setCursorPosition(codeInput, cursorPosition);
         }
         
         // Re-enable the input event
@@ -992,7 +1154,7 @@ function initMiniGame() {
             case 3:
                 return '# Check if a number is positive, negative, or zero\nnum = 5';
             case 4:
-                return '# Calculate the sum of numbers in a list\nnumbers = [1, 2, 3, 4, 5]';
+                return '# Calculate the sum of numbers in a list\nnumbers = [1, 2, 3, 4, 5]\nsuma = 0\n\n# Write a for loop to add each number to suma\n# Then print suma outside the loop';
             default:
                 return '# Write your code here';
         }
@@ -1021,15 +1183,15 @@ function initMiniGame() {
         } else if (level === 3) {
             gameContent.innerHTML = `
                 <h4>Year 3 Challenge: Conditional Statements</h4>
-                <p>Write a program to check if the variable "num" is positive, negative, or zero, and print the result.</p>
+                <p>Write a program using <code>if</code>, <code>elif</code>, and <code>else</code> to check if the variable <code>num</code> (which is set to 5) is positive, negative, or zero. Print the appropriate message ("Positive", "Negative", or "Zero") for each case.</p>
             `;
-            hintText.textContent = 'Use if, elif, and else to check conditions: if num > 0: print("Positive")';
+            hintText.textContent = 'Use if, elif, and else: e.g., if num > 0: print("Positive")';
         } else if (level === 4) {
             gameContent.innerHTML = `
-                <h4>Year 4 Challenge: Loops and Lists</h4>
-                <p>Calculate and print the sum of all numbers in the given list using a loop.</p>
+                <h4>Year 4 Challenge: Loops and Summing</h4>
+                <p>Use a <code>for</code> loop to calculate the sum of numbers in the list <code>numbers = [1, 2, 3, 4, 5]</code>. Store the result in a variable <code>suma</code>, then print it outside the loop. The output should be <code>15</code>.</p>
             `;
-            hintText.textContent = 'Use a for loop to iterate through the list and add each number to a total variable.';
+            hintText.textContent = 'Use a for loop to iterate over the list, add each number to suma, then print suma outside the loop.';
         }
         
         // Set default code
@@ -1070,72 +1232,106 @@ function initMiniGame() {
                         output = 'Error: SyntaxError: invalid syntax';
                     }
                 } else {
-                    output = 'Error: Did you forget to use the print() function?';
+                    output = 'Error: Missing print statement';
                 }
             } else if (currentMiniGameLevel === 2) {
-                // Year 2: Variables and printing
-                const variableAssignment = /\w+\s*=\s*[^=]+/.test(code);
-                const printStatement = /print\s*\(\s*\w+\s*\)/.test(code);
-                
-                if (variableAssignment && printStatement) {
-                    // Extract variable name and value
-                    const varMatch = code.match(/(\w+)\s*=\s*([^=;]+)/);
-                    if (varMatch) {
-                        const varName = varMatch[1];
-                        let varValue = varMatch[2].trim();
-                        
-                        // Check if value is a string
-                        if ((varValue.startsWith('"') && varValue.endsWith('"')) || 
-                            (varValue.startsWith("'") && varValue.endsWith("'"))) {
-                            varValue = varValue.substring(1, varValue.length - 1);
-                        }
-                        
-                        output = varValue;
-                        isCorrect = true;
+                // Year 2: Variables and assignment
+                if (code.includes('x = 10') && code.includes('print(x)')) {
+                    output = '10';
+                    isCorrect = true;
+                } else if (code.includes('x =') && code.includes('print(x)')) {
+                    // They assigned something else to x
+                    const match = code.match(/x\s*=\s*([0-9]+)/);
+                    if (match && match[1]) {
+                        output = match[1];
                     } else {
-                        output = 'Error: Could not parse variable assignment';
+                        output = 'Error: Invalid variable assignment';
                     }
-                } else if (variableAssignment) {
-                    output = 'Error: You assigned a variable but didn\'t print it';
-                } else if (printStatement) {
-                    output = 'Error: NameError: name is not defined';
+                } else if (code.includes('x =')) {
+                    output = 'Error: You declared the variable, but did not print it';
+                } else if (code.includes('print')) {
+                    output = 'Error: You need to assign a value to a variable first';
                 } else {
-                    output = 'Error: Your code should assign a variable and print it';
+                    output = 'Error: Missing variable assignment and print statement';
                 }
             } else if (currentMiniGameLevel === 3) {
-                // Year 3: Conditional statements
-                const hasIfStatement = /if\s+num\s*>/.test(code);
-                const hasElseIfStatement = /elif\s+num\s*</.test(code) || /else\s+if\s+num\s*</.test(code);
-                const hasElseStatement = /else\s*:/.test(code);
-                const hasPrintPositive = /print\s*\(\s*["']Positive["']\s*\)/.test(code);
-                const hasPrintNegative = /print\s*\(\s*["']Negative["']\s*\)/.test(code);
-                const hasPrintZero = /print\s*\(\s*["']Zero["']\s*\)/.test(code);
+                // Year 3: Conditionals
+                const num = 5;  // The number to check
                 
-                if (hasIfStatement && (hasElseIfStatement || hasElseStatement) && 
-                    (hasPrintPositive || hasPrintNegative || hasPrintZero)) {
-                    output = 'Positive';  // Since num = 5 in the default code
+                if (code.includes('if') && code.includes('else') && 
+                   (code.includes('num > 0') || code.includes('num >= 1')) && 
+                   code.includes('print("Positive")')) {
+                    output = 'Positive';
                     isCorrect = true;
-                } else if (hasIfStatement) {
-                    output = 'Partial solution: You have the if statement, but need to handle all cases (positive, negative, zero)';
+                } else if (code.includes('if') && code.includes('num')) {
+                    // They tried conditionals but got it wrong
+                    if (code.includes('print("Positive")')) {
+                        output = 'Positive';
+                    } else if (code.includes('print("Negative")')) {
+                        output = 'Negative';
+                    } else if (code.includes('print("Zero")')) {
+                        output = 'Zero';
+                    } else {
+                        output = 'Error: Not printing the correct message';
+                    }
+                } else if (code.includes('if')) {
+                    output = 'Error: Your conditional is not checking "num"';
                 } else {
-                    output = 'Error: Your code should use if/elif/else to check if num is positive, negative, or zero';
+                    output = 'Error: Missing if/elif/else conditionals';
                 }
             } else if (currentMiniGameLevel === 4) {
                 // Year 4: Loops and lists
-                const hasForLoop = /for\s+\w+\s+in\s+numbers/.test(code);
-                const hasTotalVariable = /total\s*=\s*0/.test(code) || /sum\s*=\s*0/.test(code);
-                const hasAddition = /total\s*\+=/.test(code) || /sum\s*\+=/.test(code) || /total\s*=\s*total\s*\+/.test(code);
-                const hasPrintTotal = /print\s*\(\s*total\s*\)/.test(code) || /print\s*\(\s*sum\s*\)/.test(code);
+                const hasForLoop = /for\s+\w+\s+in\s+numbers/.test(code) || 
+                                  /for\s+\w+\s+in\s+range\s*\(\s*len\s*\(\s*numbers\s*\)\s*\)/.test(code);
+                const hasSumaVar = /suma\s*=\s*0/.test(code);
+                const hasAddition = /suma\s*\+=/.test(code) || /suma\s*=\s*suma\s*\+/.test(code);
+                const hasPrintSuma = /print\s*\(\s*suma\s*\)/.test(code);
                 
-                if (hasForLoop && hasTotalVariable && hasAddition && hasPrintTotal) {
+                const lines = code.split('\n');
+                let forLoopLine = -1;
+                let printLine = -1;
+                let forLoopIndent = 0;
+                let printIndent = 0;
+                let hasIndentedCode = false;
+                
+                for (let i = 0; i < lines.length; i++) {
+                    const line = lines[i];
+                    const indentMatch = line.match(/^(\s*)/);
+                    const indent = indentMatch ? indentMatch[1].length : 0;
+                    
+                    if (line.trim().startsWith('for') && line.trim().includes('in')) {
+                        forLoopLine = i;
+                        forLoopIndent = indent;
+                    } 
+                    else if (forLoopLine !== -1 && i > forLoopLine && indent > forLoopIndent) {
+                        hasIndentedCode = true;
+                    }
+                    else if (line.trim().startsWith('print') && line.includes('suma')) {
+                        printLine = i;
+                        printIndent = indent;
+                    }
+                }
+                
+                // Check if print is outside the loop (less indented than the loop body)
+                const printOutsideLoop = printLine > forLoopLine && printIndent <= forLoopIndent;
+                
+                if (hasSumaVar && hasForLoop && hasAddition && hasPrintSuma && printOutsideLoop && hasIndentedCode) {
                     output = '15';  // Sum of [1, 2, 3, 4, 5]
                     isCorrect = true;
-                } else if (hasForLoop && hasTotalVariable) {
-                    output = 'Partial solution: You have the loop and total variable, but need to add each number and print the result';
+                } else if (hasForLoop && hasAddition && hasPrintSuma) {
+                    if (!printOutsideLoop) {
+                        output = 'Make sure to print the suma outside the for loop (not indented).';
+                    } else if (!hasSumaVar) {
+                        output = 'Initialize suma to 0 before the loop.';
+                    } else if (!hasIndentedCode) {
+                        output = 'Make sure your loop has properly indented code inside it.';
+                    } else {
+                        output = 'Check your loop logic. Did you add each number to suma?';
+                    }
                 } else if (hasForLoop) {
-                    output = 'Partial solution: You have the loop, but need to initialize a total variable, add each number, and print the result';
+                    output = 'Partial solution: You have the loop, but need to add each number to suma and print the result outside the loop.';
                 } else {
-                    output = 'Error: Your code should use a for loop to iterate through the list and calculate the sum';
+                    output = 'Error: Use a for loop to iterate through the list, add each number to suma, and print suma outside the loop.';
                 }
             }
             
@@ -1151,11 +1347,80 @@ function initMiniGame() {
                 feedbackElement.textContent = getLevelSuccessMessage(currentMiniGameLevel);
                 feedbackElement.classList.add('show', 'success');
                 
-                // Show next level button
-                nextLevelBtn.style.display = 'inline-flex';
+                // Hide buttons immediately
                 runBtn.style.display = 'none';
                 resetBtn.style.display = 'none';
                 hintBtn.style.display = 'none';
+                
+                // Check if this is the final level (Year 4)
+                if (currentMiniGameLevel === 4) {
+                    console.log('Year 4 completed! Showing final screen');
+                    
+                    // Use a short delay to ensure the user sees the success message first
+                    setTimeout(() => {
+                        // Get the modal content element directly
+                        const modalContent = document.querySelector('#mini-game-modal .modal-content');
+                        if (!modalContent) {
+                            console.error('Cannot find modal content element');
+                            return;
+                        }
+                        
+                        // Store original content for restoration
+                        const originalContent = modalContent.innerHTML;
+                        if (!modalContent.dataset.originalContent) {
+                            modalContent.dataset.originalContent = originalContent;
+                        }
+                        
+                        // Replace content with final screen
+                        console.log('Replacing modal content with final screen');
+                        modalContent.innerHTML = `
+                            <div class="final-screen">
+                                <h3>Congratulations, Jorge!</h3>
+                                <p>Wish the coding difficulty throughout the years was like this mini-game! Congrats on mastering these coding challenges—your journey as a developer is just getting started!</p>
+                                <button id="close-mini-game-btn" class="game-btn">Close Mini-Game</button>
+                            </div>
+                        `;
+                        
+                        // Add event listener to the close button
+                        const closeBtn = document.getElementById('close-mini-game-btn');
+                        if (closeBtn) {
+                            closeBtn.addEventListener('click', () => {
+                                console.log('Close mini-game button clicked');
+                                
+                                // Close the modal
+                                const miniGameModal = document.getElementById('mini-game-modal');
+                                if (miniGameModal) {
+                                    miniGameModal.classList.remove('active');
+                                } else {
+                                    console.error('Cannot find mini-game modal element');
+                                }
+                                
+                                // Restore original content after a delay
+                                setTimeout(() => {
+                                    if (modalContent.dataset.originalContent) {
+                                        modalContent.innerHTML = modalContent.dataset.originalContent;
+                                    }
+                                    
+                                    // Reset game state for future plays
+                                    currentMiniGameLevel = 1;
+                                    completedLevels = [];
+                                    updateLevelIndicators();
+                                    
+                                    // Reset button display
+                                    runBtn.style.display = 'inline-flex';
+                                    resetBtn.style.display = 'inline-flex';
+                                    hintBtn.style.display = 'inline-flex';
+                                    nextLevelBtn.style.display = 'none';
+                                }, 300);
+                            });
+                        } else {
+                            console.error('Cannot find close button element');
+                        }
+                    }, 1000);
+                } else {
+                    // Show next level button for non-final levels
+                    nextLevelBtn.style.display = 'inline-flex';
+                }
                 
                 // Play success sound
                 try {
@@ -1167,33 +1432,11 @@ function initMiniGame() {
                 // Add to completed levels if not already there
                 if (!completedLevels.includes(currentMiniGameLevel)) {
                     completedLevels.push(currentMiniGameLevel);
-                    updateLevelIndicators();
-                }
-            } else {
-                // Play error sound if output contains error
-                if (output.startsWith('Error:')) {
-                    try {
-                        playSound('error');
-                    } catch (error) {
-                        console.error('Error playing sound:', error);
-                    }
-                } else {
-                    try {
-                        playSound('click');
-                    } catch (error) {
-                        console.error('Error playing sound:', error);
-                    }
                 }
             }
         } catch (error) {
             console.error('Error running code:', error);
             consoleOutput.innerHTML = `<span class="console-prompt">&gt;&gt;&gt; </span><span class="console-error">Error: ${error.message}</span>`;
-            
-            try {
-                playSound('error');
-            } catch (soundError) {
-                console.error('Error playing sound:', soundError);
-            }
         }
     }
     
@@ -2742,4 +2985,63 @@ function playSound(soundName, volume = 0.3) {
     audio.play().catch(error => {
         console.warn(`Error playing sound: ${error.message}`);
     });
+}
+
+// Helper function to set cursor position in contentEditable element
+function setCursorPosition(element, position) {
+    if (!element) {
+        console.error('Element is undefined in setCursorPosition');
+        return false;
+    }
+    
+    console.log(`Setting cursor position to ${position} in element`, element);
+    const nodeStack = [element];
+    let currentPos = 0;
+    let found = false;
+    
+    // Walk through all text nodes to find the right position
+    while (nodeStack.length > 0 && !found) {
+        const currentNode = nodeStack.pop();
+        
+        if (currentNode.nodeType === Node.TEXT_NODE) {
+            const nodeLength = currentNode.nodeValue.length;
+            
+            if (currentPos + nodeLength >= position) {
+                // This is the node where the cursor should be
+                const range = document.createRange();
+                const offset = position - currentPos;
+                
+                // Make sure offset is within bounds
+                const safeOffset = Math.min(Math.max(0, offset), nodeLength);
+                
+                try {
+                    range.setStart(currentNode, safeOffset);
+                    range.setEnd(currentNode, safeOffset);
+                    
+                    const selection = window.getSelection();
+                    selection.removeAllRanges();
+                    selection.addRange(range);
+                    found = true;
+                } catch (error) {
+                    console.error('Error setting cursor position:', error);
+                }
+                break;
+            }
+            
+            currentPos += nodeLength;
+        } else {
+            // Add child nodes to the stack in reverse order
+            // so we process them in the correct order
+            const children = Array.from(currentNode.childNodes);
+            for (let i = children.length - 1; i >= 0; i--) {
+                nodeStack.push(children[i]);
+            }
+        }
+    }
+    
+    if (!found) {
+        console.warn(`Could not find position ${position} in element. Current position reached: ${currentPos}`);
+    }
+    
+    return found;
 } 

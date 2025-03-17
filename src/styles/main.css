@@ -2436,4 +2436,42 @@ nav ul li {
 .chatbot-context-aware.show {
     opacity: 1;
     transform: translateY(0);
+}
+
+/* Mini-game final screen */
+.final-screen {
+    text-align: center;
+    padding: 40px 20px;
+    color: #E0E0E0;
+}
+
+.final-screen h3 {
+    color: #4CAF50;
+    font-size: 28px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.final-screen p {
+    font-size: 16px;
+    line-height: 1.6;
+    color: #E0E0E0;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.game-btn {
+    display: inline-block;
+    padding: 12px 24px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+.game-btn:hover {
+    background-color: #45a049;
 } 
