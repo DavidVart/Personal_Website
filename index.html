@@ -111,7 +111,7 @@
                             <span class="stat-label">Projects Completed</span>
                             <div class="stat-tooltip">I've built 4 major projects, including a quadruped robot!</div>
                         </div>
-                        <div class="stat-item" id="languages-spoken" data-sound="piano" data-value="4">
+                        <div class="stat-item" id="languages-spoken" data-sound="piano" data-value="4" style="cursor: pointer;" onclick="document.getElementById('language-game-modal').classList.add('active'); console.log('Languages Spoken clicked via HTML'); if (typeof loadLanguageGameLevel === 'function') { loadLanguageGameLevel(1); }">
                             <div class="stat-circle">
                                 <span class="stat-number">?</span>
                             </div>
@@ -698,6 +698,58 @@
                     <h4><i class="fas fa-lightbulb"></i> Hint</h4>
                     <p id="hint-text">Try using the print() function with your text in quotes.</p>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Language Game Modal -->
+    <div id="language-game-modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Language Challenge</h3>
+                <span class="close-modal" onclick="document.getElementById('language-game-modal').classList.remove('active'); console.log('Close language game button clicked via HTML');">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="level-progress">
+                    <div class="level-indicator" data-level="1">
+                        <div class="level-number">1</div>
+                        <div class="level-label">English</div>
+                    </div>
+                    <div class="level-indicator" data-level="2">
+                        <div class="level-number">2</div>
+                        <div class="level-label">Spanish</div>
+                    </div>
+                    <div class="level-indicator" data-level="3">
+                        <div class="level-number">3</div>
+                        <div class="level-label">French</div>
+                    </div>
+                    <div class="level-indicator" data-level="4">
+                        <div class="level-number">4</div>
+                        <div class="level-label">Hebrew</div>
+                    </div>
+                </div>
+                
+                <div id="language-game-content">
+                    <div class="language-challenge">
+                        <div class="language-mascot">
+                            <img src="public/images/duo-mascot.svg" alt="Language Mascot" id="language-mascot">
+                        </div>
+                        <div class="challenge-prompt" id="challenge-prompt">
+                            How do you greet someone in English?
+                        </div>
+                        <div class="challenge-options" id="challenge-options">
+                            <!-- Options will be generated dynamically -->
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="language-game-controls">
+                    <button id="check-answer-btn" class="btn"><i class="fas fa-check"></i> Check</button>
+                    <button id="language-hint-btn" class="btn btn-secondary"><i class="fas fa-lightbulb"></i> Hint</button>
+                    <button id="language-next-level-btn" class="btn" style="display: none;"><i class="fas fa-arrow-right"></i> Next Level</button>
+                </div>
+                
+                <div id="language-feedback" class="feedback"></div>
             </div>
         </div>
     </div>

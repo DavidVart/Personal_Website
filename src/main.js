@@ -24,6 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initTimelineAnimation();
     initInteractiveStats();
     initMiniGame();
+    initLanguageGame();
     initChatbot();
     initBackToTop();
     initParticles();
@@ -3044,4 +3045,419 @@ function setCursorPosition(element, position) {
     }
     
     return found;
-} 
+}
+
+// Global variable for language game
+let currentLanguageLevel = 1;
+let completedLanguageLevels = [];
+let selectedOption = null;
+
+// Language game data
+const languageData = [
+    {
+        language: "English",
+        prompt: "How do you greet someone in English?",
+        options: ["Hello", "Hola", "Bonjour", "Shalom"],
+        correctAnswer: "Hello",
+        hint: "This is the standard greeting in English, starting with H.",
+        successMessage: "Excellent! In English, we say 'Hello' as a greeting."
+    },
+    {
+        language: "Spanish",
+        prompt: "What's the common greeting in Spanish?",
+        options: ["Hello", "Hola", "Bonjour", "Shalom"],
+        correctAnswer: "Hola",
+        hint: "This greeting is common in Spain and Latin American countries.",
+        successMessage: "¡Muy bien! 'Hola' is how we say hello in Spanish."
+    },
+    {
+        language: "French",
+        prompt: "Which word would you use to say hi in French?",
+        options: ["Hello", "Hola", "Bonjour", "Shalom"],
+        correctAnswer: "Bonjour",
+        hint: "This formal French greeting literally means 'good day'.",
+        successMessage: "Très bien! 'Bonjour' is the French greeting for hello."
+    },
+    {
+        language: "Hebrew",
+        prompt: "How would you welcome someone in Hebrew?",
+        options: ["Hello", "Hola", "Bonjour", "Shalom"],
+        correctAnswer: "Shalom",
+        hint: "This Hebrew greeting also means 'peace'.",
+        successMessage: "מצוין! (Excellent!) 'Shalom' is how we say hello in Hebrew."
+    }
+];
+
+// Initialize language game
+function initLanguageGame() {
+    console.log('Initializing language game');
+    
+    const languagesSpokenElement = document.getElementById('languages-spoken');
+    const languageGameModal = document.getElementById('language-game-modal');
+    const closeModal = document.querySelector('#language-game-modal .close-modal');
+    const checkAnswerBtn = document.getElementById('check-answer-btn');
+    const hintBtn = document.getElementById('language-hint-btn');
+    const nextLevelBtn = document.getElementById('language-next-level-btn');
+    const feedbackElement = document.getElementById('language-feedback');
+    const challengeOptions = document.getElementById('challenge-options');
+    
+    // Check if all elements exist
+    if (!languagesSpokenElement || !languageGameModal || !closeModal || 
+        !checkAnswerBtn || !hintBtn || !nextLevelBtn || !feedbackElement || 
+        !challengeOptions) {
+        console.error('Language game elements not found');
+        return;
+    }
+    
+    // Make the Languages Spoken element clickable
+    languagesSpokenElement.style.cursor = 'pointer';
+    
+    // Open language game when Languages Spoken is clicked
+    languagesSpokenElement.addEventListener('click', () => {
+        console.log('Languages Spoken element clicked');
+        openLanguageGame();
+    });
+    
+    // Function to open the language game
+    function openLanguageGame() {
+        languageGameModal.classList.add('active');
+        updateLanguageLevelIndicators();
+        loadLanguageLevel(currentLanguageLevel);
+        try {
+            playSound('click');
+        } catch (error) {
+            console.error('Error playing sound:', error);
+        }
+    }
+    
+    // Close modal when clicking the X
+    closeModal.addEventListener('click', () => {
+        console.log('Close language game button clicked');
+        languageGameModal.classList.remove('active');
+    });
+    
+    // Close modal when clicking outside the content
+    window.addEventListener('click', (event) => {
+        if (event.target === languageGameModal) {
+            console.log('Clicked outside language game modal content');
+            languageGameModal.classList.remove('active');
+        }
+    });
+    
+    // Check answer button functionality
+    checkAnswerBtn.addEventListener('click', () => {
+        console.log('Check answer button clicked');
+        checkAnswer();
+    });
+    
+    // Hint button functionality
+    hintBtn.addEventListener('click', () => {
+        console.log('Language hint button clicked');
+        showLanguageHint();
+        try {
+            playSound('click');
+        } catch (error) {
+            console.error('Error playing sound:', error);
+        }
+    });
+    
+    // Next level button functionality
+    nextLevelBtn.addEventListener('click', () => {
+        console.log('Next language level button clicked');
+        
+        // Move to the next level or complete the game if all levels are done
+        if (!completedLanguageLevels.includes(currentLanguageLevel)) {
+            completedLanguageLevels.push(currentLanguageLevel);
+        }
+        
+        if (currentLanguageLevel < languageData.length) {
+            currentLanguageLevel++;
+            loadLanguageLevel(currentLanguageLevel);
+            nextLevelBtn.style.display = 'none';
+        } else {
+            // Game completed
+            completeLanguageGame();
+        }
+        
+        try {
+            playSound('click');
+        } catch (error) {
+            console.error('Error playing sound:', error);
+        }
+    });
+    
+    // Update level indicators based on current level and completed levels
+    function updateLanguageLevelIndicators() {
+        const levelIndicators = document.querySelectorAll('#language-game-modal .level-indicator');
+        
+        levelIndicators.forEach((indicator, index) => {
+            const level = index + 1;
+            
+            // Reset all level indicators
+            indicator.classList.remove('active', 'completed');
+            
+            // Mark completed levels
+            if (completedLanguageLevels.includes(level)) {
+                indicator.classList.add('completed');
+            }
+            
+            // Mark current level
+            if (level === currentLanguageLevel) {
+                indicator.classList.add('active');
+            }
+        });
+    }
+    
+    // Load a specific language level
+    function loadLanguageLevel(level) {
+        // Adjust level index (1-based to 0-based)
+        const levelIndex = level - 1;
+        
+        if (levelIndex < 0 || levelIndex >= languageData.length) {
+            console.error('Invalid language level:', level);
+            return;
+        }
+        
+        const levelData = languageData[levelIndex];
+        
+        // Update challenge prompt
+        const promptElement = document.getElementById('challenge-prompt');
+        if (promptElement) {
+            promptElement.textContent = levelData.prompt;
+        }
+        
+        // Clear options
+        const optionsContainer = document.getElementById('challenge-options');
+        if (optionsContainer) {
+            optionsContainer.innerHTML = '';
+            
+            // Add options
+            levelData.options.forEach((option, index) => {
+                const optionButton = document.createElement('div');
+                optionButton.className = 'option-button';
+                optionButton.textContent = option;
+                optionButton.dataset.option = option;
+                
+                // Add click handler
+                optionButton.addEventListener('click', () => {
+                    // Remove selected class from all options
+                    document.querySelectorAll('.option-button').forEach(btn => {
+                        btn.classList.remove('selected');
+                    });
+                    
+                    // Add selected class to this option
+                    optionButton.classList.add('selected');
+                    
+                    // Store selected option
+                    selectedOption = option;
+                });
+                
+                optionsContainer.appendChild(optionButton);
+            });
+        }
+        
+        // Reset feedback
+        const feedbackElement = document.getElementById('language-feedback');
+        if (feedbackElement) {
+            feedbackElement.textContent = '';
+            feedbackElement.className = 'feedback';
+        }
+        
+        // Hide next level button
+        const nextLevelButton = document.getElementById('language-next-level-btn');
+        if (nextLevelButton) {
+            nextLevelButton.style.display = 'none';
+        }
+        
+        // Reset selected option
+        selectedOption = null;
+        
+        // Update level indicators
+        updateLanguageLevelIndicators();
+    }
+    
+    // Show hint for current level
+    function showLanguageHint() {
+        const levelIndex = currentLanguageLevel - 1;
+        
+        if (levelIndex < 0 || levelIndex >= languageData.length) {
+            return;
+        }
+        
+        const hint = languageData[levelIndex].hint;
+        const feedbackElement = document.getElementById('language-feedback');
+        
+        if (feedbackElement) {
+            feedbackElement.textContent = hint;
+            feedbackElement.className = 'feedback show';
+        }
+    }
+    
+    // Check answer
+    function checkAnswer() {
+        if (!selectedOption) {
+            // No option selected
+            const feedbackElement = document.getElementById('language-feedback');
+            if (feedbackElement) {
+                feedbackElement.textContent = 'Please select an option!';
+                feedbackElement.className = 'feedback show error';
+            }
+            return;
+        }
+        
+        const levelIndex = currentLanguageLevel - 1;
+        
+        if (levelIndex < 0 || levelIndex >= languageData.length) {
+            return;
+        }
+        
+        const correctAnswer = languageData[levelIndex].correctAnswer;
+        const feedbackElement = document.getElementById('language-feedback');
+        const nextLevelButton = document.getElementById('language-next-level-btn');
+        
+        // Mark selected option as correct or incorrect
+        document.querySelectorAll('.option-button').forEach(btn => {
+            if (btn.dataset.option === selectedOption) {
+                if (selectedOption === correctAnswer) {
+                    btn.classList.add('correct');
+                } else {
+                    btn.classList.add('incorrect');
+                }
+            }
+            
+            // Show correct answer if user got it wrong
+            if (btn.dataset.option === correctAnswer && selectedOption !== correctAnswer) {
+                setTimeout(() => {
+                    btn.classList.add('correct');
+                }, 500);
+            }
+        });
+        
+        if (selectedOption === correctAnswer) {
+            // Correct answer
+            if (feedbackElement) {
+                feedbackElement.textContent = languageData[levelIndex].successMessage;
+                feedbackElement.className = 'feedback show success';
+            }
+            
+            // Show next level button
+            if (nextLevelButton) {
+                nextLevelButton.style.display = 'block';
+            }
+            
+            // Celebrate
+            try {
+                playSound('success');
+            } catch (error) {
+                console.error('Error playing sound:', error);
+            }
+            
+            // Trigger mascot animation
+            const mascot = document.getElementById('language-mascot');
+            if (mascot) {
+                mascot.classList.add('celebrating');
+                setTimeout(() => {
+                    mascot.classList.remove('celebrating');
+                }, 1000);
+            }
+            
+            // Update stat number if all levels completed
+            if (!completedLanguageLevels.includes(currentLanguageLevel)) {
+                completedLanguageLevels.push(currentLanguageLevel);
+                
+                if (completedLanguageLevels.length === languageData.length) {
+                    // All levels completed
+                    const statNumber = document.querySelector('#languages-spoken .stat-number');
+                    if (statNumber) {
+                        statNumber.textContent = languageData.length;
+                    }
+                }
+            }
+        } else {
+            // Incorrect answer
+            if (feedbackElement) {
+                feedbackElement.textContent = 'Incorrect. Try again!';
+                feedbackElement.className = 'feedback show error';
+            }
+            
+            try {
+                playSound('error');
+            } catch (error) {
+                console.error('Error playing sound:', error);
+            }
+        }
+    }
+    
+    // Complete the language game
+    function completeLanguageGame() {
+        // Hide game content
+        const gameContent = document.getElementById('language-game-content');
+        if (gameContent) {
+            gameContent.innerHTML = `
+                <div class="game-completion">
+                    <div class="completion-mascot">
+                        <img src="public/images/duo-mascot.svg" alt="Language Assistant" class="celebrating">
+                    </div>
+                    <h3>Language Mission Complete!</h3>
+                    <p class="multilingual-congrats">¡Felicidades! Congratulations! Félicitations! !ברכות</p>
+                    <p>You've mastered greetings in all 4 languages!</p>
+                    <p>Now we can have conversations in English, Spanish, French, and Hebrew!</p>
+                    <div class="completion-flags">
+                        <div class="flag-icon"><span>🇺🇸</span><span>Hello</span></div>
+                        <div class="flag-icon"><span>🇪🇸</span><span>Hola</span></div>
+                        <div class="flag-icon"><span>🇫🇷</span><span>Bonjour</span></div>
+                        <div class="flag-icon"><span>🇮🇱</span><span>Shalom</span></div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Hide game controls
+        const gameControls = document.getElementById('language-game-controls');
+        if (gameControls) {
+            gameControls.style.display = 'none';
+        }
+        
+        // Update the stat number
+        const statNumber = document.querySelector('#languages-spoken .stat-number');
+        if (statNumber) {
+            statNumber.textContent = languageData.length;
+        }
+        
+        // Play celebration sound
+        try {
+            playSound('success', 0.5);
+        } catch (error) {
+            console.error('Error playing sound:', error);
+        }
+        
+        // Update the symbol in the mascot SVG to show completion
+        try {
+            const symbolText = document.getElementById('symbol-text');
+            if (symbolText) {
+                symbolText.textContent = "4";
+            }
+        } catch (error) {
+            console.error('Error updating mascot:', error);
+        }
+    }
+}
+
+function loadLanguageGameLevel(level) {
+    // This function is called from HTML onclick
+    currentLanguageLevel = level;
+    const levelIndicators = document.querySelectorAll('#language-game-modal .level-indicator');
+    
+    levelIndicators.forEach((indicator, index) => {
+        // Reset all indicators first
+        indicator.classList.remove('active');
+        
+        // Set the active indicator for the current level
+        if (index + 1 === level) {
+            indicator.classList.add('active');
+        }
+    });
+    
+    // Load the level content
+    loadLanguageLevel(level);
+}

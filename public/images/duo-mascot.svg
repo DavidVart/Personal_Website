@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200px" height="200px" viewBox="0 0 200 200" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Language Assistant</title>
+    <defs>
+        <linearGradient id="bodyGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#00E5FF"/>
+            <stop offset="100%" stop-color="#00A3E0"/>
+        </linearGradient>
+        <linearGradient id="glowGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#4DFFFF"/>
+            <stop offset="100%" stop-color="#00D4B4"/>
+        </linearGradient>
+        <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="8"/>
+            <feColorMatrix type="matrix" values="0 0 0 0 0   0 0 0 0 0.8   0 0 0 0 0.8  0 0 0 0.5 0"/>
+            <feBlend in="SourceGraphic" in2="glow" mode="screen"/>
+        </filter>
+        <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
+            <feOffset dx="0" dy="4"/>
+            <feComposite in2="SourceAlpha" operator="arithmetic" k2="-1" k3="1"/>
+            <feColorMatrix type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.3 0"/>
+        </filter>
+    </defs>
+    <g id="mascot" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <!-- Shadow -->
+        <ellipse id="shadow" fill="#000000" opacity="0.2" cx="100" cy="180" rx="70" ry="10"></ellipse>
+        
+        <!-- Glow effect behind robot -->
+        <circle id="glow" fill="url(#glowGradient)" opacity="0.3" cx="100" cy="100" r="90" filter="url(#glow)"></circle>
+        
+        <!-- Robot head/body -->
+        <circle id="body" fill="url(#bodyGradient)" cx="100" cy="100" r="70" filter="url(#shadow)"></circle>
+        
+        <!-- Face plate -->
+        <circle id="face-plate" fill="#1E3050" cx="100" cy="100" r="55"></circle>
+        
+        <!-- Eyes -->
+        <g id="eyes">
+            <!-- Left Eye -->
+            <circle id="left-eye-outer" fill="#00D4B4" cx="75" cy="90" r="15"></circle>
+            <circle id="left-eye-inner" fill="#FFFFFF" cx="75" cy="90" r="10"></circle>
+            <circle id="left-eye-pupil" fill="#1E3050" cx="75" cy="90" r="5"></circle>
+            <circle id="left-eye-highlight" fill="#FFFFFF" cx="72" cy="87" r="3"></circle>
+            
+            <!-- Right Eye -->
+            <circle id="right-eye-outer" fill="#00D4B4" cx="125" cy="90" r="15"></circle>
+            <circle id="right-eye-inner" fill="#FFFFFF" cx="125" cy="90" r="10"></circle>
+            <circle id="right-eye-pupil" fill="#1E3050" cx="125" cy="90" r="5"></circle>
+            <circle id="right-eye-highlight" fill="#FFFFFF" cx="122" cy="87" r="3"></circle>
+        </g>
+        
+        <!-- Mouth -->
+        <path id="mouth" fill="none" stroke="#00D4B4" stroke-width="5" stroke-linecap="round" d="M80,125 Q100,145 120,125"></path>
+        
+        <!-- Antennas -->
+        <circle id="left-antenna-base" fill="#00A3E0" cx="70" cy="45" r="8"></circle>
+        <circle id="left-antenna-tip" fill="#00D4B4" cx="65" cy="30" r="5"></circle>
+        <line id="left-antenna" x1="70" y1="45" x2="65" y2="30" stroke="#00A3E0" stroke-width="3" stroke-linecap="round"></line>
+        
+        <circle id="right-antenna-base" fill="#00A3E0" cx="130" cy="45" r="8"></circle>
+        <circle id="right-antenna-tip" fill="#00D4B4" cx="135" cy="30" r="5"></circle>
+        <line id="right-antenna" x1="130" y1="45" x2="135" y2="30" stroke="#00A3E0" stroke-width="3" stroke-linecap="round"></line>
+        
+        <!-- Language symbols -->
+        <circle id="symbol-circle" fill="#1E3050" stroke="#00D4B4" stroke-width="2" cx="100" cy="150" r="12"></circle>
+        <text id="symbol-text" font-family="Arial" font-size="16" font-weight="bold" fill="#00D4B4" text-anchor="middle" x="100" y="155">A</text>
+    </g>
+</svg> 
