@@ -2095,88 +2095,310 @@ nav ul li {
     will-change: transform;
 }
 
+.chatbot-container.default-position {
+    animation: chatbot-floating 3s ease-in-out infinite;
+}
+
+@keyframes chatbot-floating {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-8px);
+    }
+}
+
 .chatbot-toggle {
     position: relative;
     width: 60px;
     height: 60px;
     border-radius: 50%;
-    background-color: var(--primary-color);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     cursor: pointer;
+    transition: all 0.3s;
+    text-align: center;
     overflow: hidden;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.chatbot-toggle:hover {
-    transform: scale(1.05);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
-}
-
-/* Left eye */
-.chatbot-toggle::before {
-    content: '';
-    position: absolute;
-    background-color: white;
-    border-radius: 50%;
-    transition: all 0.2s ease-out;
-    width: 10px;
-    height: 10px;
-    top: var(--eye-left-y, 20px);
-    left: var(--eye-left-x, 18px);
-    box-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
-}
-
-/* Right eye */
-.chatbot-toggle::after {
-    content: '';
-    position: absolute;
-    background-color: white;
-    border-radius: 50%;
-    transition: all 0.2s ease-out;
-    width: 10px;
-    height: 10px;
-    top: var(--eye-right-y, 20px);
-    right: var(--eye-right-x, 18px);
-    box-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
-}
-
-/* Chatbot face with smile */
-.chatbot-face {
-    position: absolute;
-    width: 30px;
-    height: 10px;
-    bottom: var(--face-bottom, 18px);
-    left: var(--face-left, 15px);
-    border-radius: 0 0 15px 15px;
-    border-bottom: 2px solid white;
-    box-shadow: 0 2px 4px rgba(255, 255, 255, 0.3);
-    transition: all 0.2s ease-out;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+    background: transparent;
+    box-shadow: none;
 }
 
 .chatbot-toggle:hover {
     transform: scale(1.1);
-    box-shadow: 0 5px 25px rgba(0, 212, 180, 0.4);
 }
 
-/* Add a wobble animation for the chatbot */
+.chatbot-face-svg {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    transition: all 0.3s ease;
+}
+
+/* Animation for various chatbot states */
 @keyframes wobble {
     0%, 100% { transform: rotate(0deg); }
     25% { transform: rotate(-10deg); }
     75% { transform: rotate(10deg); }
 }
 
-/* Add a bounce animation for the chatbot */
 @keyframes bounce {
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-10px); }
 }
 
-/* Add a surprised expression animation */
 @keyframes surprised {
     0%, 100% { transform: scale(1); }
     50% { transform: scale(1.2); }
 }
 
+#language-game-controls {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+#language-feedback {
+    margin-top: 20px;
+    padding: 15px;
+    border-radius: 5px;
+    text-align: center;
+    font-weight: bold;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+#language-feedback.show {
+    opacity: 1;
+}
+
+#language-feedback.success {
+    background-color: rgba(120, 200, 0, 0.2);
+    color: #78C800;
+}
+
+#language-feedback.error {
+    background-color: rgba(255, 75, 75, 0.2);
+    color: #FF4B4B;
+}
+
+@media (max-width: 768px) {
+    .challenge-options {
+        grid-template-columns: 1fr;
+    }
+}
+
+.game-completion {
+    text-align: center;
+    padding: 30px;
+    background-color: rgba(0, 163, 224, 0.1);
+    border-radius: 15px;
+    margin-top: 20px;
+    animation: fadeIn 0.5s ease-in-out;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(0, 212, 180, 0.3);
+}
+
+.game-completion h3 {
+    color: #00D4B4;
+    font-size: 28px;
+    margin-bottom: 15px;
+    text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.multilingual-congrats {
+    font-size: 22px;
+    color: #00A3E0;
+    margin-bottom: 15px;
+    font-weight: bold;
+}
+
+.game-completion p {
+    color: #e0e0e0;
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+.completion-mascot {
+    width: 150px;
+    height: 150px;
+    margin: 0 auto 20px;
+}
+
+.completion-mascot img {
+    width: 100%;
+    height: 100%;
+    animation: robot-celebrate 2s infinite;
+}
+
+.completion-flags {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 25px;
+    flex-wrap: wrap;
+}
+
+.flag-icon {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    animation: fadeInUp 0.5s ease-in-out forwards;
+    opacity: 0;
+    background-color: rgba(0, 212, 180, 0.1);
+    padding: 10px 15px;
+    border-radius: 10px;
+    min-width: 80px;
+    transition: all 0.3s ease;
+}
+
+.flag-icon:hover {
+    transform: translateY(-5px);
+    background-color: rgba(0, 212, 180, 0.2);
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+}
+
+.flag-icon span:first-child {
+    font-size: 28px;
+}
+
+.flag-icon span:last-child {
+    font-size: 16px;
+    font-weight: bold;
+    color: #00D4B4;
+}
+
+.flag-icon:nth-child(1) {
+    animation-delay: 0.1s;
+}
+
+.flag-icon:nth-child(2) {
+    animation-delay: 0.3s;
+}
+
+.flag-icon:nth-child(3) {
+    animation-delay: 0.5s;
+}
+
+.flag-icon:nth-child(4) {
+    animation-delay: 0.7s;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Make buttons more visually appealing */
+#language-game-controls {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+#check-answer-btn, #language-hint-btn, #language-next-level-btn {
+    font-size: 16px;
+    padding: 12px 24px;
+    border-radius: 50px;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 600;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+#check-answer-btn {
+    background: linear-gradient(135deg, #58b957 0%, #78C800 100%);
+    color: white;
+}
+
+#check-answer-btn:hover {
+    background: linear-gradient(135deg, #6acd68 0%, #8ae800 100%);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+#language-hint-btn {
+    background: linear-gradient(135deg, #4a4a4a 0%, #333333 100%);
+    color: white;
+}
+
+#language-hint-btn:hover {
+    background: linear-gradient(135deg, #5a5a5a 0%, #444444 100%);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+#language-next-level-btn {
+    background: linear-gradient(135deg, #00A3E0 0%, #009ad5 100%);
+    color: white;
+}
+
+#language-next-level-btn:hover {
+    background: linear-gradient(135deg, #00b7fa 0%, #00aeef 100%);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+#check-answer-btn i, #language-hint-btn i, #language-next-level-btn i {
+    font-size: 18px;
+}
+
+.challenge-options {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    width: 100%;
+    max-width: 600px;
+}
+
+.option-button {
+    background-color: #333;
+    color: #FFF;
+    border: 2px solid #555;
+    border-radius: 10px;
+    padding: 15px;
+    font-size: 18px;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-align: center;
+}
+
+.option-button:hover {
+    background-color: #444;
+    transform: translateY(-2px);
+}
+
+.option-button.selected {
+    border-color: #00D4B4;
+    background-color: #1a3a3a;
+}
+
+.option-button.correct {
+    border-color: #78C800;
+    background-color: rgba(120, 200, 0, 0.2);
+}
+
+.option-button.incorrect {
+    border-color: #FF4B4B;
+    background-color: rgba(255, 75, 75, 0.2);
+}
+
+/* Chatbot Window and UI */
 .chatbot-window {
     position: absolute;
     bottom: 80px;
@@ -2438,42 +2660,49 @@ nav ul li {
     transform: translateY(0);
 }
 
-/* Mini-game final screen */
-.final-screen {
-    text-align: center;
-    padding: 40px 20px;
-    color: #E0E0E0;
-}
-
-.final-screen h3 {
-    color: #4CAF50;
-    font-size: 28px;
-    margin-bottom: 20px;
-    text-align: center;
-}
-
-.final-screen p {
-    font-size: 16px;
-    line-height: 1.6;
-    color: #E0E0E0;
-    margin-bottom: 30px;
-    text-align: center;
-}
-
-.game-btn {
-    display: inline-block;
-    padding: 12px 24px;
-    background-color: #4CAF50;
+/* Styles for the fun facts bubble */
+.chatbot-context.fun-fact-bubble {
+    position: absolute;
+    bottom: auto !important;
+    left: auto !important;
+    top: -100px !important; /* Position it higher above the face */
+    right: -20px !important; /* Offset to the right */
+    width: 180px !important; /* Fixed width for better text wrapping */
+    max-width: 180px !important;
+    background-color: var(--accent-color);
     color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 16px;
-    transition: background-color 0.3s ease;
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 13px;
+    line-height: 1.3;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transform-origin: bottom right;
+    z-index: 1000;
+    pointer-events: none; /* Prevent blocking clicks */
+    opacity: 0;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    transform: scale(0.8) translateY(10px);
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+    text-align: center;
 }
 
-.game-btn:hover {
-    background-color: #45a049;
+.chatbot-context.fun-fact-bubble:after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    right: 30px;
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-top: 8px solid var(--accent-color);
+}
+
+.chatbot-context.fun-fact-bubble.show {
+    opacity: 1 !important;
+    transform: scale(1) translateY(0) !important;
 }
 
 /* Language Game Modal Styles */
@@ -2499,7 +2728,7 @@ nav ul li {
     border-radius: 10px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
     width: 90%;
-    max-width: 800px;
+    max-width: 500px; /* Reduced from 600px to make it smaller */
     position: relative;
     animation: modalFadeIn 0.3s ease-out;
     overflow: visible;
@@ -2508,346 +2737,155 @@ nav ul li {
 }
 
 #language-game-modal .modal-header {
+    padding: 15px 20px;
+    border-bottom: 1px solid #333;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 15px 20px;
-    border-bottom: 1px solid #333;
-    background-color: #252525;
+    background-color: #00D4B4;
+    color: white;
     border-radius: 10px 10px 0 0;
 }
 
 #language-game-modal .modal-header h3 {
     margin: 0;
-    color: #00D4B4;
+    font-size: 1.5rem;
 }
 
 #language-game-modal .close-modal {
-    font-size: 24px;
-    color: #999;
+    position: static;
+    font-size: 1.8rem;
+    font-weight: bold;
     cursor: pointer;
-    transition: color 0.3s;
+    color: white;
 }
 
 #language-game-modal .close-modal:hover {
-    color: #00D4B4;
+    color: #ddd;
 }
 
 #language-game-modal .modal-body {
-    padding: 20px;
+    padding: 15px;
+    max-height: 70vh;
+    overflow-y: auto;
 }
 
-.language-challenge {
+/* Language game specific styles */
+#language-game-modal .language-challenge {
+    margin-bottom: 20px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    margin-bottom: 20px;
 }
 
-.language-mascot {
-    width: 120px;
-    height: 120px;
+#language-game-modal .language-mascot {
+    width: 100px;
+    height: 100px;
     margin-bottom: 15px;
-    animation: mascotBounce 2s infinite;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
-@keyframes mascotBounce {
-    0%, 100% {
-        transform: translateY(0);
-    }
-    50% {
-        transform: translateY(-10px) scale(1.05);
-    }
-}
-
-.language-mascot img {
+#language-game-modal .language-mascot img {
     width: 100%;
     height: 100%;
-    transition: all 0.3s ease;
+    object-fit: contain;
 }
 
-.language-mascot img.celebrating {
-    animation: robot-celebrate 1.5s ease infinite;
-}
-
-@keyframes robot-celebrate {
-    0%, 100% {
-        transform: scale(1);
-    }
-    25% {
-        transform: scale(1.1) rotate(-5deg);
-    }
-    50% {
-        transform: scale(1.15);
-    }
-    75% {
-        transform: scale(1.1) rotate(5deg);
-    }
-}
-
-@keyframes mascotBounce {
-    0%, 100% {
-        transform: translateY(0);
-    }
-    50% {
-        transform: translateY(-10px) scale(1.05);
-    }
-}
-
-.challenge-prompt {
-    font-size: 24px;
-    font-weight: bold;
+#language-game-modal .challenge-prompt {
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+    color: #fff;
     text-align: center;
-    margin-bottom: 20px;
-    color: #FFFFFF;
-    background-color: #252525;
-    padding: 15px 20px;
-    border-radius: 10px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    background-color: rgba(0, 212, 180, 0.1);
+    padding: 15px;
+    border-radius: 8px;
+    border-left: 3px solid #00D4B4;
 }
 
-.challenge-options {
+#language-game-modal .btn {
+    background-color: #00D4B4;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+#language-game-modal .btn:hover {
+    background-color: #00B89A;
+}
+
+#language-game-modal .btn-secondary {
+    background-color: #555;
+}
+
+#language-game-modal .btn-secondary:hover {
+    background-color: #444;
+}
+
+#language-game-modal .btn i {
+    font-size: 0.9rem;
+}
+
+#language-hint {
+    background-color: #252525;
+    border-left: 4px solid #00D4B4;
+    padding: 15px;
+    margin-top: 15px;
+    border-radius: 0 5px 5px 0;
+    display: none;
+}
+
+#language-hint.show {
+    display: block;
+} 
+
+/* Progress tracking for language game */
+#language-game-modal .level-progress {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    padding: 8px;
+    background-color: #252525;
+    border-radius: 5px;
+}
+
+#language-game-modal .challenge-options {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 15px;
+    gap: 10px;
     width: 100%;
-    max-width: 600px;
+    max-width: 450px;
+    margin-top: 10px;
 }
 
-.option-button {
+#language-game-modal .option-button {
     background-color: #333;
     color: #FFF;
     border: 2px solid #555;
-    border-radius: 10px;
-    padding: 15px;
-    font-size: 18px;
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 16px;
     cursor: pointer;
     transition: all 0.3s;
     text-align: center;
-}
-
-.option-button:hover {
-    background-color: #444;
-    transform: translateY(-2px);
-}
-
-.option-button.selected {
-    border-color: #00D4B4;
-    background-color: #1a3a3a;
-}
-
-.option-button.correct {
-    border-color: #78C800;
-    background-color: rgba(120, 200, 0, 0.2);
-}
-
-.option-button.incorrect {
-    border-color: #FF4B4B;
-    background-color: rgba(255, 75, 75, 0.2);
 }
 
 #language-game-controls {
     display: flex;
     justify-content: center;
     gap: 10px;
-    margin-top: 20px;
+    margin-top: 15px;
 }
 
-#language-feedback {
-    margin-top: 20px;
-    padding: 15px;
-    border-radius: 5px;
-    text-align: center;
-    font-weight: bold;
-    opacity: 0;
-    transition: opacity 0.3s;
+#language-game-modal .btn {
+    padding: 8px 16px;
+    font-size: 0.9rem;
 }
-
-#language-feedback.show {
-    opacity: 1;
-}
-
-#language-feedback.success {
-    background-color: rgba(120, 200, 0, 0.2);
-    color: #78C800;
-}
-
-#language-feedback.error {
-    background-color: rgba(255, 75, 75, 0.2);
-    color: #FF4B4B;
-}
-
-@media (max-width: 768px) {
-    .challenge-options {
-        grid-template-columns: 1fr;
-    }
-}
-
-.game-completion {
-    text-align: center;
-    padding: 30px;
-    background-color: rgba(0, 163, 224, 0.1);
-    border-radius: 15px;
-    margin-top: 20px;
-    animation: fadeIn 0.5s ease-in-out;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-    border: 1px solid rgba(0, 212, 180, 0.3);
-}
-
-.game-completion h3 {
-    color: #00D4B4;
-    font-size: 28px;
-    margin-bottom: 15px;
-    text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-}
-
-.multilingual-congrats {
-    font-size: 22px;
-    color: #00A3E0;
-    margin-bottom: 15px;
-    font-weight: bold;
-}
-
-.game-completion p {
-    color: #e0e0e0;
-    font-size: 18px;
-    margin-bottom: 10px;
-}
-
-.completion-mascot {
-    width: 150px;
-    height: 150px;
-    margin: 0 auto 20px;
-}
-
-.completion-mascot img {
-    width: 100%;
-    height: 100%;
-    animation: robot-celebrate 2s infinite;
-}
-
-.completion-flags {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    margin-top: 25px;
-    flex-wrap: wrap;
-}
-
-.flag-icon {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 5px;
-    animation: fadeInUp 0.5s ease-in-out forwards;
-    opacity: 0;
-    background-color: rgba(0, 212, 180, 0.1);
-    padding: 10px 15px;
-    border-radius: 10px;
-    min-width: 80px;
-    transition: all 0.3s ease;
-}
-
-.flag-icon:hover {
-    transform: translateY(-5px);
-    background-color: rgba(0, 212, 180, 0.2);
-    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
-}
-
-.flag-icon span:first-child {
-    font-size: 28px;
-}
-
-.flag-icon span:last-child {
-    font-size: 16px;
-    font-weight: bold;
-    color: #00D4B4;
-}
-
-.flag-icon:nth-child(1) {
-    animation-delay: 0.1s;
-}
-
-.flag-icon:nth-child(2) {
-    animation-delay: 0.3s;
-}
-
-.flag-icon:nth-child(3) {
-    animation-delay: 0.5s;
-}
-
-.flag-icon:nth-child(4) {
-    animation-delay: 0.7s;
-}
-
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Make buttons more visually appealing */
-#language-game-controls {
-    display: flex;
-    justify-content: center;
-    gap: 15px;
-    margin-top: 20px;
-}
-
-#check-answer-btn, #language-hint-btn, #language-next-level-btn {
-    font-size: 16px;
-    padding: 12px 24px;
-    border-radius: 50px;
-    border: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-weight: 600;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-#check-answer-btn {
-    background: linear-gradient(135deg, #58b957 0%, #78C800 100%);
-    color: white;
-}
-
-#check-answer-btn:hover {
-    background: linear-gradient(135deg, #6acd68 0%, #8ae800 100%);
-    transform: translateY(-3px);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
-}
-
-#language-hint-btn {
-    background: linear-gradient(135deg, #4a4a4a 0%, #333333 100%);
-    color: white;
-}
-
-#language-hint-btn:hover {
-    background: linear-gradient(135deg, #5a5a5a 0%, #444444 100%);
-    transform: translateY(-3px);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
-}
-
-#language-next-level-btn {
-    background: linear-gradient(135deg, #00A3E0 0%, #009ad5 100%);
-    color: white;
-}
-
-#language-next-level-btn:hover {
-    background: linear-gradient(135deg, #00b7fa 0%, #00aeef 100%);
-    transform: translateY(-3px);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
-}
-
-#check-answer-btn i, #language-hint-btn i, #language-next-level-btn i {
-    font-size: 18px;
-} 

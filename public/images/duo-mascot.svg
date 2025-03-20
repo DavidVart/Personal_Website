@@ -61,9 +61,5 @@
         <circle id="right-antenna-base" fill="#00A3E0" cx="130" cy="45" r="8"></circle>
         <circle id="right-antenna-tip" fill="#00D4B4" cx="135" cy="30" r="5"></circle>
         <line id="right-antenna" x1="130" y1="45" x2="135" y2="30" stroke="#00A3E0" stroke-width="3" stroke-linecap="round"></line>
-        
-        <!-- Language symbols -->
-        <circle id="symbol-circle" fill="#1E3050" stroke="#00D4B4" stroke-width="2" cx="100" cy="150" r="12"></circle>
-        <text id="symbol-text" font-family="Arial" font-size="16" font-weight="bold" fill="#00D4B4" text-anchor="middle" x="100" y="155">A</text>
     </g>
 </svg> 

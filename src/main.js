@@ -1464,20 +1464,20 @@ function initMiniGame() {
 
 // Chatbot functionality
 function initChatbot() {
-    console.log('Initializing AI chatbot');
+    console.log('Initializing chatbot');
     
+    const chatbotContainer = document.querySelector('.chatbot-container');
     const chatbotToggle = document.getElementById('chatbot-toggle');
+    const chatbotFaceSvg = document.querySelector('.chatbot-face-svg'); // Updated for SVG
     const chatbotWindow = document.getElementById('chatbot-window');
     const chatbotClose = document.getElementById('chatbot-close');
-    const chatbotMessages = document.getElementById('chatbot-messages');
     const chatbotInput = document.getElementById('chatbot-input-field');
     const chatbotSend = document.getElementById('chatbot-send');
-    const chatbotContext = document.getElementById('chatbot-context');
+    const chatbotMessages = document.getElementById('chatbot-messages');
     const chatbotSuggestions = document.getElementById('chatbot-suggestions');
-    const chatbotFace = document.querySelector('.chatbot-face');
-    const chatbotContainer = document.querySelector('.chatbot-container');
+    const chatbotContext = document.getElementById('chatbot-context');
     
-    if (!chatbotToggle || !chatbotWindow || !chatbotMessages || !chatbotInput || !chatbotSend || !chatbotContainer) {
+    if (!chatbotContainer || !chatbotToggle || !chatbotFaceSvg || !chatbotWindow || !chatbotClose || !chatbotInput || !chatbotSend || !chatbotMessages || !chatbotSuggestions || !chatbotContext) {
         console.error('Chatbot elements not found');
         return;
     }
@@ -1497,6 +1497,7 @@ function initChatbot() {
     let lastExpression = Date.now();
     let velocity = { x: 0, y: 0 }; // For dragging effect
     let lastFunFactTime = 0;
+    let chatbotOpen = false;
     
     // Store original position
     const originalRight = 30;
@@ -1505,37 +1506,23 @@ function initChatbot() {
     // Set max movement range (px from original position)
     const maxRangeX = 100;
     const maxRangeY = 80;
-
-    // Fun facts about the profile
-    const funFacts = [
-        "Did you know David built a quadruped robot?",
-        "David is fluent in Python, JavaScript, and C++!",
-        "David has experience in AI and machine learning!",
-        "David worked as a Lead Software Developer at Jobsi!",
-        "David is studying Computer Science & AI at IE University!",
-        "David has leadership experience through Taglit Excel!",
-        "David loves combining robotics with software development!",
-        "David has worked on data visualization tools!",
-        "Click me to chat with David's AI assistant!",
-        "David has experience in full-stack development!"
-    ];
     
-    // Position the context bubble properly
+    // Function to position the context bubble for fun facts
     function positionContextBubble() {
         console.log('Positioning context bubble for fun facts');
+        // Create a style element for our dynamic styles
+        const styleEl = document.createElement('style');
         
-        // Add a class to style the context bubble differently
-        chatbotContext.classList.add('fun-fact-bubble');
-        
-        // Remove any existing styles first to avoid conflicts
-        const existingStyles = document.getElementById('chatbot-context-styles');
-        if (existingStyles) {
-            existingStyles.remove();
+        // Remove any existing styles to avoid conflicts
+        const existingStyle = document.getElementById('chatbot-context-styles');
+        if (existingStyle) {
+            existingStyle.remove();
         }
         
-        // Add CSS to the head
-        const styleEl = document.createElement('style');
+        // Set an ID for the style element
         styleEl.id = 'chatbot-context-styles';
+        
+        // Add the fun-fact-bubble class styles
         styleEl.textContent = `
             .chatbot-context.fun-fact-bubble {
                 position: absolute;
@@ -1600,22 +1587,26 @@ function initChatbot() {
         chatbotContext.style.hyphens = 'auto';
         chatbotContext.style.zIndex = '1000';
         chatbotContext.style.pointerEvents = 'none';
-        
-        console.log('Context bubble styles applied');
     }
     
     // Function to check if we're in the hero section
     function checkVisibleSection() {
-        const heroSection = document.getElementById('hero');
-        const aboutSection = document.getElementById('about');
-        
-        if (!heroSection || !aboutSection) return true; // Default to visible if sections not found
+        const heroSection = document.querySelector('.hero-section');
+        if (!heroSection) return false;
         
         const heroRect = heroSection.getBoundingClientRect();
-        const aboutRect = aboutSection.getBoundingClientRect();
+        // Return true only if hero section takes up significant portion of viewport
+        return heroRect.top < window.innerHeight / 2 && heroRect.bottom > window.innerHeight / 2;
+    }
+    
+    // Function to check if we're in the About section specifically
+    function isInAboutSection() {
+        const aboutSection = document.getElementById('about');
+        if (!aboutSection) return false;
         
-        // Only follow in hero section, return to default position when about section is visible
-        return heroRect.bottom > 0 && aboutRect.top > window.innerHeight * 0.5;
+        const aboutRect = aboutSection.getBoundingClientRect();
+        // Return true if the About section is the current visible section
+        return aboutRect.top < window.innerHeight / 2 && aboutRect.bottom > window.innerHeight / 2;
     }
     
     // Function to update chatbot position with spring physics for smooth, goofy movement
@@ -1636,7 +1627,8 @@ function initChatbot() {
             currentY += velocity.y;
             
             // Apply the position
-            chatbotContainer.style.transform = `translate(${-currentX}px, ${-currentY}px)`;
+            chatbotContainer.style.right = `${currentX}px`;
+            chatbotContainer.style.bottom = `${currentY}px`;
             
             // Add some rotation based on velocity for dragging effect
             const rotation = Math.min(8, Math.max(-8, velocity.x * 0.2));
@@ -1645,6 +1637,7 @@ function initChatbot() {
             
             isMoving = true;
             lastMoveTime = Date.now();
+            chatbotContainer.classList.remove('default-position');
             
             // Clear any existing timeout and set a new one
             clearTimeout(moveTimeout);
@@ -1653,6 +1646,11 @@ function initChatbot() {
                     isMoving = false;
                     // Return to normal rotation and scale
                     chatbotToggle.style.transform = 'rotate(0deg) scaleX(1)';
+                    
+                    // Add the default-position class when at rest in the default position
+                    if (Math.abs(currentX - originalRight) < 2 && Math.abs(currentY - originalBottom) < 2) {
+                        chatbotContainer.classList.add('default-position');
+                    }
                 }
             }, 300);
             
@@ -1662,6 +1660,11 @@ function initChatbot() {
             velocity.x = 0;
             velocity.y = 0;
             chatbotToggle.style.transform = 'rotate(0deg) scaleX(1)';
+            
+            // Add the default-position class when at rest in the default position
+            if (Math.abs(currentX - originalRight) < 2 && Math.abs(currentY - originalBottom) < 2) {
+                chatbotContainer.classList.add('default-position');
+            }
         }
     }
     
@@ -1672,9 +1675,9 @@ function initChatbot() {
             const expressions = [
                 () => {
                     // Surprised expression
-                    chatbotFace.style.animation = 'surprised 0.5s ease-in-out';
+                    chatbotToggle.style.animation = 'surprised 0.5s ease-in-out';
                     setTimeout(() => {
-                        chatbotFace.style.animation = '';
+                        chatbotToggle.style.animation = '';
                     }, 500);
                 },
                 () => {
@@ -1700,23 +1703,17 @@ function initChatbot() {
             lastExpression = Date.now();
         }
         
-        // Schedule next expression check
-        expressionTimeout = setTimeout(showRandomExpression, 1000);
+        // Schedule the next check
+        clearTimeout(expressionTimeout);
+        expressionTimeout = setTimeout(showRandomExpression, 2000 + Math.random() * 3000);
     }
-
+    
     // Function to show a random fun fact
     function showRandomFunFact() {
-        if (Date.now() - lastFunFactTime > 8000 && checkVisibleSection() && !chatbotWindow.classList.contains('open')) {
+        if (Date.now() - lastFunFactTime > 8000 && isInHeroSection && !chatbotWindow.classList.contains('open')) {
             const randomFact = funFacts[Math.floor(Math.random() * funFacts.length)];
             chatbotContext.textContent = randomFact;
-            
-            // Ensure positioning is correct before showing
-            chatbotContext.style.top = '-100px';
-            chatbotContext.style.right = '-20px';
-            chatbotContext.style.bottom = 'auto';
-            chatbotContext.style.left = 'auto';
-            chatbotContext.style.width = '180px';
-            chatbotContext.style.maxWidth = '180px';
+            chatbotContext.classList.add('fun-fact-bubble');
             
             // Show the fun fact
             chatbotContext.classList.add('show');
@@ -1729,44 +1726,17 @@ function initChatbot() {
             lastFunFactTime = Date.now();
         }
     }
-
+    
     // Initialize the context bubble positioning
     positionContextBubble();
-
+    
     // Add mouse move event listener for face and chatbot following
     document.addEventListener('mousemove', (e) => {
-        // Only follow mouse when not in chat mode and in hero section
-        const shouldFollowMouse = !chatbotWindow.classList.contains('open') && checkVisibleSection();
+        // Check if we're in the hero section
+        isInHeroSection = checkVisibleSection();
         
-        if (shouldFollowMouse) {
-            // Calculate mouse position
-            const mouseX = e.clientX / window.innerWidth;
-            const mouseY = e.clientY / window.innerHeight;
-            
-            // Update last mouse position
-            lastMouseX = mouseX;
-            lastMouseY = mouseY;
-            
-            // Calculate eye positions with reduced movement (more steady)
-            const leftEyeX = 18 + (mouseX - 0.5) * 6;  // Reduced from 15 to 6
-            const leftEyeY = 20 + (mouseY - 0.5) * 6;  // Reduced from 15 to 6
-            const rightEyeX = 18 + (mouseX - 0.5) * 6; // Reduced from 15 to 6
-            const rightEyeY = 20 + (mouseY - 0.5) * 6; // Reduced from 15 to 6
-            
-            // Update face position with reduced movement
-            const faceLeftPos = 15 + (mouseX - 0.5) * 8;  // Reduced from 20 to 8
-            const faceBottomPos = 18 + (mouseY - 0.5) * 8; // Reduced from 20 to 8
-            
-            // Update face position directly with CSS variables
-            chatbotFace.style.setProperty('--face-left', `${faceLeftPos}px`);
-            chatbotFace.style.setProperty('--face-bottom', `${faceBottomPos}px`);
-            
-            // Update eye positions via CSS variables
-            chatbotToggle.style.setProperty('--eye-left-x', `${leftEyeX}px`);
-            chatbotToggle.style.setProperty('--eye-left-y', `${leftEyeY}px`);
-            chatbotToggle.style.setProperty('--eye-right-x', `${rightEyeX}px`);
-            chatbotToggle.style.setProperty('--eye-right-y', `${rightEyeY}px`);
-            
+        // Only follow mouse if not open and we're still in the hero section
+        if (!chatbotOpen && isInHeroSection) {
             // Move the entire chatbot to follow the mouse across the screen
             // Map mouse position to screen coordinates with some padding
             const screenPadding = 80; // Padding from screen edges in pixels
@@ -1777,6 +1747,9 @@ function initChatbot() {
             targetX = Math.max(screenPadding, Math.min(window.innerWidth - screenPadding, targetX));
             targetY = Math.max(screenPadding, Math.min(window.innerHeight - screenPadding, targetY));
             
+            // Remove the default position class when following mouse
+            chatbotContainer.classList.remove('default-position');
+            
             // Start the animation if not already running
             if (!isMoving) {
                 updateChatbotPosition();
@@ -1784,31 +1757,26 @@ function initChatbot() {
             
             // Show random fun facts in following mode
             showRandomFunFact();
-        } else {
-            // Reset to default position when chat is open or scrolled past hero section
+        } else if (!chatbotOpen && !isInHeroSection) {
+            // Reset to default position when scrolled past hero section
             targetX = originalRight;
             targetY = originalBottom;
             
             if (!isMoving) {
                 updateChatbotPosition();
             }
-            
-            // Reset face and eyes to center
-            chatbotFace.style.setProperty('--face-left', '15px');
-            chatbotFace.style.setProperty('--face-bottom', '18px');
-            chatbotToggle.style.setProperty('--eye-left-x', '18px');
-            chatbotToggle.style.setProperty('--eye-left-y', '20px');
-            chatbotToggle.style.setProperty('--eye-right-x', '18px');
-            chatbotToggle.style.setProperty('--eye-right-y', '20px');
         }
     });
     
     // Check scroll position to update chatbot visibility and behavior
     window.addEventListener('scroll', () => {
-        const shouldFollowMouse = checkVisibleSection();
+        // Get current state
+        const wasInHeroSection = isInHeroSection;
+        isInHeroSection = checkVisibleSection();
+        const aboutSectionVisible = isInAboutSection();
         
-        // If we've scrolled past the hero section, reset to default position
-        if (!shouldFollowMouse) {
+        // If we just scrolled to the About section from hero, reset to default position
+        if (aboutSectionVisible || (!isInHeroSection && wasInHeroSection)) {
             targetX = originalRight;
             targetY = originalBottom;
             
@@ -1818,6 +1786,83 @@ function initChatbot() {
             
             // Hide any fun facts when returning to default position
             chatbotContext.classList.remove('show');
+        }
+        
+        // If we just scrolled back to hero section, allow following again
+        if (isInHeroSection && !wasInHeroSection && !chatbotOpen) {
+            // Next mousemove will handle positioning
+            console.log("Back in hero section - chatbot will follow mouse again");
+        }
+    });
+    
+    // Ensure we only have one click handler for the toggle
+    chatbotToggle.removeEventListener('click', toggleChatbot);
+    
+    // Define toggle function
+    function toggleChatbot() {
+        console.log("Toggle chatbot clicked");
+        chatbotWindow.classList.toggle('open');
+        chatbotOpen = chatbotWindow.classList.contains('open');
+        
+        // Reset to default position when opened
+        if (chatbotOpen) {
+            targetX = originalRight;
+            targetY = originalBottom;
+            
+            if (!isMoving) {
+                updateChatbotPosition();
+            }
+            
+            // Hide context bubble when chat is open
+            chatbotContext.classList.remove('show');
+            
+            // Reset to normal appearance
+            chatbotToggle.style.animation = '';
+            chatbotContainer.style.animation = '';
+            
+            // Focus the input field for immediate typing
+            setTimeout(() => {
+                chatbotInput.focus();
+            }, 300);
+        }
+    }
+    
+    // Add the click event listener
+    chatbotToggle.addEventListener('click', toggleChatbot);
+    
+    // Close chatbot when clicking the close button
+    chatbotClose.addEventListener('click', () => {
+        chatbotWindow.classList.remove('open');
+        chatbotOpen = false;
+        
+        // If we're in the hero section, allow following the mouse again
+        if (isInHeroSection) {
+            // The next mousemove will handle positioning
+        } else {
+            // Ensure we're in the default position
+            targetX = originalRight;
+            targetY = originalBottom;
+            if (!isMoving) {
+                updateChatbotPosition();
+            }
+        }
+    });
+    
+    // Send message on button click
+    chatbotSend.addEventListener('click', sendMessage);
+    
+    // Send message on Enter key press
+    chatbotInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            sendMessage();
+        }
+    });
+    
+    // Click on suggestion chips
+    chatbotSuggestions.addEventListener('click', (e) => {
+        if (e.target.classList.contains('suggestion-chip')) {
+            chatbotInput.value = e.target.textContent;
+            sendMessage();
         }
     });
     
@@ -1834,35 +1879,30 @@ function initChatbot() {
     let currentSection = '';
     let hasInteracted = false;
     let suggestionsShown = false;
+    
+    // Sample fun facts about David
+    const funFacts = [
+        "I've built 4 robots from scratch!",
+        "I speak 3 languages fluently!",
+        "My code has helped over 10,000 users!",
+        "I won the National Robotics Championship!",
+        "I've contributed to 12 open-source projects!",
+        "I play piano and write music in my free time!",
+        "I've led teams of up to 15 developers!",
+        "My favorite language is Python, but I'm falling for Rust!",
+        "I've lived in 4 different countries!",
+        "My first program was a simple game written at age 12!"
+    ];
+    
+    // Context-aware messages for each section
     const contextMessages = {
-        'hero': [
-            "Welcome to David's portfolio! Would you like to learn more about his projects or skills?",
-            "I can help you navigate the site. What would you like to explore first?"
-        ],
-        'about': [
-            "David is a Computer Science & AI student with expertise in software development and robotics.",
-            "Interested in knowing more about David's background or achievements?"
-        ],
-        'experience': [
-            "David has experience as a Lead Software Developer at Jobsi and as a Robotics Engineer.",
-            "Want to learn more about his professional journey?"
-        ],
-        'skills': [
-            "David's core skills include Python, JavaScript, C++, and machine learning.",
-            "His expertise spans across AI, robotics, and full-stack development."
-        ],
-        'projects': [
-            "Check out David's projects like the Quadruped Robot and Jobsi Web App.",
-            "Would you like details about a specific project?"
-        ],
-        'education': [
-            "David is pursuing a Bachelor's in Computer Science & AI at IE University.",
-            "He also has leadership experience through programs like Taglit Excel."
-        ],
-        'contact': [
-            "You can get in touch with David through the contact form or his social profiles.",
-            "Need David's contact information or want to send him a message?"
-        ]
+        'hero': ["Let me tell you about David's projects and skills!", "Want to learn about David's expertise?", "Ask me anything about David's work!"],
+        'about': ["David has an impressive background! Ask me about it.", "Curious about David's achievements?", "David has many interesting hobbies!"],
+        'experience': ["David has worked on some cool projects!", "Ask me about David's work with Jobsi.", "David has great experience in AI and robotics!"],
+        'skills': ["David is proficient in many programming languages!", "Ask me about David's technical skills!", "David specializes in AI and machine learning."],
+        'projects': ["These projects showcase David's abilities!", "Ask me for details on any project.", "Which project interests you the most?"],
+        'education': ["David has a strong educational background!", "Ask me about David's academic achievements!", "David's constantly learning new skills!"],
+        'contact': ["Want to get in touch with David?", "David would love to hear from you!", "Need David's contact information?"]
     };
     
     const suggestions = {
@@ -1931,13 +1971,15 @@ function initChatbot() {
             });
             
             // Animate suggestions in
-            anime({
-                targets: '.suggestion-chip',
-                translateY: [10, 0],
-                opacity: [0, 1],
-                delay: anime.stagger(100),
-                easing: 'easeOutQuad'
-            });
+            if (typeof anime !== 'undefined') {
+                anime({
+                    targets: '.suggestion-chip',
+                    translateY: [10, 0],
+                    opacity: [0, 1],
+                    delay: anime.stagger(100),
+                    easing: 'easeOutQuad'
+                });
+            }
             
             suggestionsShown = true;
         }
@@ -1949,64 +1991,6 @@ function initChatbot() {
     // Initialize with current section
     setTimeout(updateCurrentSection, 1000);
     
-    // Toggle chatbot window
-    chatbotToggle.addEventListener('click', () => {
-        chatbotWindow.classList.toggle('open');
-        chatbotToggle.classList.toggle('active');
-        
-        if (chatbotWindow.classList.contains('open')) {
-            updateSuggestions();
-            chatbotInput.focus();
-            
-            // Add typing animation for welcome message
-            if (!hasInteracted) {
-                // Clear existing messages
-                chatbotMessages.innerHTML = '';
-                
-                // Add typing indicator
-                const typingIndicator = document.createElement('div');
-                typingIndicator.className = 'message bot-message typing-indicator';
-                typingIndicator.innerHTML = '<span class="message-dot"></span><span class="message-dot"></span><span class="message-dot"></span>';
-                chatbotMessages.appendChild(typingIndicator);
-                
-                // Replace with actual message after delay
-                setTimeout(() => {
-                    chatbotMessages.removeChild(typingIndicator);
-                    
-                    // Use contextual welcome message based on current section
-                    let welcomeMessage = "Hi! I'm David's AI assistant. What would you like to know about his work?";
-                    if (currentSection && contextMessages[currentSection]) {
-                        welcomeMessage = contextMessages[currentSection][0];
-                    }
-                    
-                    addMessage(welcomeMessage, 'bot');
-                }, 1500);
-            }
-        } else {
-            // Reset suggestions shown flag when closing
-            suggestionsShown = false;
-        }
-        
-        hasInteracted = true;
-    });
-    
-    // Close chatbot window
-    chatbotClose.addEventListener('click', (e) => {
-        e.stopPropagation();
-        chatbotWindow.classList.remove('open');
-        chatbotToggle.classList.remove('active');
-        suggestionsShown = false;
-    });
-    
-    // Send message on button click
-    chatbotSend.addEventListener('click', sendMessage);
-    
-    // Send message on Enter key
-    chatbotInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-            sendMessage();
-        }
-    });
     
     // Function to send user message
     function sendMessage() {
@@ -2048,57 +2032,60 @@ function initChatbot() {
         }
     }
     
-    // Function to generate response based on user message
     function generateResponse(message) {
         message = message.toLowerCase();
         
-        // Check for keywords and generate appropriate responses
-        if (message.includes('project') || message.includes('work')) {
-            return "David has worked on some amazing projects including a Quadruped Robot, Jobsi Web App, and Data Visualization Tool. Each demonstrates his skills in different areas of technology. Which one would you like to know more about?";
-        } else if (message.includes('robot') || message.includes('quadruped')) {
-            return "The Quadruped Robot was built with optimized movement algorithms using PyTorch and has remote control capabilities via Raspberry Pi. It can navigate various terrains and showcases David's robotics engineering skills.";
-        } else if (message.includes('jobsi') || message.includes('web app')) {
-            return "The Jobsi Web App is a full-stack application with AI integration that revolutionizes the job application process. It launched with over 2,000 users on day one and features a responsive UI for optimal user experience.";
-        } else if (message.includes('data') || message.includes('visualization')) {
-            return "The Data Visualization Tool creates interactive dashboards for complex data analysis, enabling clients to make data-driven decisions more efficiently. It improved decision-making processes by 20%.";
-        } else if (message.includes('skill') || message.includes('expertise')) {
-            return "David's core skills include Python, JavaScript, C++, AI, and robotics engineering. He also has experience in full-stack development, data analysis, and machine learning.";
-        } else if (message.includes('contact') || message.includes('get in touch')) {
-            return "You can contact David through the contact form in the Contact section, or reach out via his LinkedIn and GitHub profiles linked at the bottom of the page.";
-        } else if (message.includes('education') || message.includes('study')) {
-            return "David is pursuing a Bachelor's in Computer Science & AI at IE University, expected to graduate in July 2026. His studies focus on machine learning, data analysis, and algorithms.";
-        } else if (message.includes('experience')) {
-            return "David has experience as a Lead Software Developer at Jobsi, a Robotics Engineer at the Robotics & AI Lab, a Software Engineer Intern at Axonius, and a Web Intern at BProto Organization.";
-        } else if (message.includes('hello') || message.includes('hi')) {
-            return "Hello! I'm David's AI assistant. How can I help you today?";
+        // Simple response patterns based on keywords
+        if (message.includes('experience') || message.includes('work') || message.includes('jobsi')) {
+            return "David has extensive experience in software development and robotics. He worked at Jobsi where he developed their web application using React and Node.js, improving user engagement by 32%. He also has experience in algorithm development and AI implementation.";
+        } else if (message.includes('skills') || message.includes('programming') || message.includes('languages')) {
+            return "David is skilled in JavaScript, Python, Java, C++, and is learning Rust. He has expertise in AI/ML frameworks like TensorFlow and PyTorch, as well as web technologies including React, Node.js, and various databases. His skills extend to robotics programming and hardware integration as well.";
+        } else if (message.includes('project') || message.includes('robot') || message.includes('app')) {
+            return "David has worked on several impressive projects, including a quadruped robot with custom gait algorithms, a web application for Jobsi that improved their user engagement, and various data visualization tools. Each project showcases his technical versatility and problem-solving skills.";
+        } else if (message.includes('education') || message.includes('university') || message.includes('degree')) {
+            return "David is pursuing a Bachelor's in Computer Science & AI at IE University, expected to graduate in 2026. He's maintaining an 8/10 GPA while taking advanced courses in Machine Learning, Data Analysis, Business Analytics, and Algorithms & Data Structures.";
+        } else if (message.includes('contact') || message.includes('email') || message.includes('connect')) {
+            return "You can contact David through the form in the Contact section, or reach out via LinkedIn or GitHub. He's always open to discussing new opportunities and collaborative projects!";
+        } else if (message.includes('hobby') || message.includes('free time') || message.includes('football') || message.includes('piano')) {
+            return "When not coding, David enjoys playing competitive football and piano. These activities help him maintain a creative and balanced perspective. He believes that diverse interests enhance problem-solving abilities in tech.";
         } else {
-            return "That's an interesting question! David's portfolio showcases his work in AI, robotics, and software development. Is there something specific you'd like to know about those areas?";
+            // Generic responses for other queries
+            const genericResponses = [
+                "That's an interesting question about David. He's a Computer Science and AI student passionate about creating innovative tech solutions.",
+                "David specializes in AI, robotics, and full-stack development. Is there something specific you'd like to know about his expertise?",
+                "David combines technical expertise with creative problem-solving. His projects reflect his passion for innovation and practical solutions.",
+                "David has experience in both software and hardware aspects of technology. His diverse background gives him a unique perspective on tech challenges."
+            ];
+            
+            return genericResponses[Math.floor(Math.random() * genericResponses.length)];
         }
     }
     
-    // Function to show contextual suggestions based on the previous exchange
     function showResponseSuggestions(userMessage) {
-        let newSuggestions = [];
-        userMessage = userMessage.toLowerCase();
-        
-        if (userMessage.includes('project') || userMessage.includes('work')) {
-            newSuggestions = ['Tell me about the robot', 'Jobsi Web App details', 'Data visualization project'];
-        } else if (userMessage.includes('robot') || userMessage.includes('quadruped')) {
-            newSuggestions = ['How was it built?', 'Other projects', 'Technical skills used'];
-        } else if (userMessage.includes('jobsi') || userMessage.includes('web app')) {
-            newSuggestions = ['Technologies used', 'User metrics', 'Other web projects'];
-        } else if (userMessage.includes('skill') || userMessage.includes('expertise')) {
-            newSuggestions = ['Programming languages', 'AI knowledge', 'Software development'];
-        } else if (userMessage.includes('contact')) {
-            newSuggestions = ['LinkedIn profile', 'GitHub projects', 'Send a message'];
-        } else {
-            newSuggestions = ['Projects', 'Experience', 'Skills', 'Contact info'];
-        }
-        
-        // Add suggestions
+        // Clear previous suggestions
         chatbotSuggestions.innerHTML = '';
         chatbotSuggestions.style.display = 'flex';
         
+        let newSuggestions = [];
+        userMessage = userMessage.toLowerCase();
+        
+        // Determine follow-up suggestions based on the user's message
+        if (userMessage.includes('experience') || userMessage.includes('work') || userMessage.includes('jobsi')) {
+            newSuggestions = ['Tell me about specific projects', 'What skills did you use at Jobsi?', 'Leadership experiences'];
+        } else if (userMessage.includes('skills') || userMessage.includes('programming')) {
+            newSuggestions = ['AI/ML experience', 'Web development skills', 'Software engineering projects'];
+        } else if (userMessage.includes('project') || userMessage.includes('robot')) {
+            newSuggestions = ['Technical challenges', 'Technologies used', 'Other projects'];
+        } else if (userMessage.includes('education') || userMessage.includes('university')) {
+            newSuggestions = ['Relevant courses', 'Leadership programs', 'Academic achievements'];
+        } else if (userMessage.includes('contact') || userMessage.includes('connect')) {
+            newSuggestions = ['LinkedIn profile', 'Portfolio website', 'GitHub repositories'];
+        } else {
+            // Default suggestions if no specific topic detected
+            newSuggestions = ['Tell me about your projects', 'What are your key skills?', 'Contact information'];
+        }
+        
+        // Add suggestions to the DOM
         newSuggestions.forEach(suggestion => {
             const chip = document.createElement('div');
             chip.className = 'suggestion-chip';
@@ -2110,14 +2097,16 @@ function initChatbot() {
             chatbotSuggestions.appendChild(chip);
         });
         
-        // Animate suggestions
-        anime({
-            targets: '.suggestion-chip',
-            translateY: [10, 0],
-            opacity: [0, 1],
-            delay: anime.stagger(100),
-            easing: 'easeOutQuad'
-        });
+        // Animate in the suggestions
+        if (typeof anime !== 'undefined') {
+            anime({
+                targets: '.suggestion-chip',
+                translateY: [10, 0],
+                opacity: [0, 1],
+                delay: anime.stagger(100),
+                easing: 'easeOutQuad'
+            });
+        }
     }
     
     // Function to add message to chat
