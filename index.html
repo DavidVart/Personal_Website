@@ -31,7 +31,7 @@
 </head>
 <body>
     <!-- Loading spinner -->
-    <div class="loading-spinner" aria-live="polite" role="status">
+    <div class="loading-spinner" aria-live="polite" role="status" style="display: none;">
         <div class="spinner" aria-hidden="true"></div>
         <p class="loading-text">Loading Portfolio</p>
         <div class="loading-progress">
@@ -55,6 +55,9 @@
                     <li><a href="#education" class="nav-link">Education</a></li>
                     <li><a href="#contact" class="nav-link">Contact</a></li>
                 </ul>
+                <button class="theme-toggle-nav" id="theme-toggle" aria-label="Toggle dark mode">
+                    <i class="fas fa-moon"></i>
+                </button>
                 <button class="mobile-menu-toggle" aria-label="Toggle menu">
                     <span></span>
                     <span></span>
@@ -754,28 +757,7 @@
         </div>
     </div>
 
-    <!-- Theme toggle button -->
-    <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode">
-        <i class="fas fa-moon"></i>
-    </button>
-
     <!-- Main JavaScript -->
     <script src="./src/main.js"></script>
-    <script>
-        // Fallback script to ensure loading spinner disappears
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('Fallback script loaded');
-            setTimeout(function() {
-                const loadingSpinner = document.querySelector('.loading-spinner');
-                if (loadingSpinner) {
-                    console.log('Forcing loading spinner to hide after 3 seconds');
-                    loadingSpinner.classList.add('hidden');
-                    setTimeout(function() {
-                        loadingSpinner.style.display = 'none';
-                    }, 500);
-                }
-            }, 3000);
-        });
-    </script>
 </body>
 </html> 

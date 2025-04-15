@@ -119,6 +119,58 @@ ul {
     align-items: center;
 }
 
+nav {
+    display: flex;
+    align-items: center;
+}
+
+/* Theme toggle in navbar */
+.theme-toggle-nav {
+    background-color: transparent;
+    color: var(--accent-color);
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    margin-left: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background-color 0.3s ease, transform 0.3s ease, color 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.theme-toggle-nav:hover {
+    transform: scale(1.1);
+    background-color: rgba(0, 180, 216, 0.1);
+}
+
+.theme-toggle-nav i {
+    font-size: 18px;
+}
+
+.dark-mode .theme-toggle-nav {
+    color: var(--accent-lighter);
+}
+
+/* Ripple effect for the navbar theme toggle */
+.theme-toggle-ripple {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 180, 216, 0.2);
+    border-radius: 50%;
+    transform: scale(0);
+    animation: ripple 0.6s linear;
+}
+
+/* Remove old theme toggle styles that positioned it at bottom right */
+.theme-toggle {
+    display: none;
+}
+
 .logo {
     display: flex;
     flex-direction: column;
@@ -142,7 +194,7 @@ nav ul li {
 .nav-link {
     position: relative;
     font-weight: 500;
-    transition: color 0.3s ease;
+    transition: color 0.3s ease, transform 0.3s ease;
 }
 
 .nav-link::after {
@@ -157,6 +209,7 @@ nav ul li {
 }
 
 .nav-link:hover::after,
+.nav-link.active::after,
 .nav-link[aria-current="page"]::after {
     width: 100%;
 }
@@ -166,6 +219,7 @@ nav ul li {
     transform: translateY(-2px);
 }
 
+.nav-link.active,
 .nav-link[aria-current="page"] {
     font-weight: 600;
     color: var(--accent-color);
@@ -1535,18 +1589,19 @@ nav ul li {
 
 /* Loading Spinner */
 .loading-spinner {
+    display: none; /* Hide by default */
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: var(--bg-color);
+    background-color: #fff;
+    z-index: 9999;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    z-index: 9999;
-    transition: opacity 0.5s ease, visibility 0.5s ease;
+    transition: opacity 0.5s ease;
 }
 
 .loading-spinner.hidden {
@@ -1681,15 +1736,24 @@ nav ul li {
 
 @media (max-width: 768px) {
     .header {
-        padding: 0.75rem 0;
+        padding: 1rem 0;
     }
     
     .logo h1 {
-        font-size: 1.25rem;
+        font-size: 1.2rem;
     }
     
     nav ul {
         display: none;
+    }
+    
+    nav {
+        display: flex;
+        align-items: center;
+    }
+    
+    .theme-toggle-nav {
+        margin-right: 15px;
     }
     
     .mobile-menu-toggle {

@@ -38,40 +38,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Loading functionality
 function initLoading() {
-    console.log('Initializing loading animation');
+    console.log('Loading screen disabled');
     
     const loadingSpinner = document.querySelector('.loading-spinner');
-    const progressBar = document.querySelector('.progress-bar');
     const mainContent = document.querySelector('main');
     
-    if (!loadingSpinner || !progressBar || !mainContent) {
+    if (!loadingSpinner || !mainContent) {
         console.error('Loading elements not found');
         return;
     }
     
-    mainContent.style.display = 'none';
+    // Hide the spinner immediately
+    loadingSpinner.style.display = 'none';
     
-    let progress = 0;
-    const interval = setInterval(() => {
-        progress += Math.random() * 10;
-        if (progress > 100) progress = 100;
-        
-        progressBar.style.width = `${progress}%`;
-        
-        if (progress === 100) {
-            clearInterval(interval);
-            setTimeout(() => {
-                loadingSpinner.style.opacity = '0';
-                setTimeout(() => {
-                    loadingSpinner.style.display = 'none';
-                    mainContent.style.display = 'block';
-                    setTimeout(() => {
-                        mainContent.style.opacity = '1';
-                    }, 50);
-                }, 500);
-            }, 500);
-        }
-    }, 200);
+    // Show the main content immediately
+    mainContent.style.display = 'block';
+    mainContent.style.opacity = '1';
 }
 
 // Navigation functionality
@@ -100,32 +82,52 @@ function initNavigation() {
                 
                 // Update active link
                 navLinks.forEach(navLink => navLink.classList.remove('active'));
+                navLinks.forEach(navLink => navLink.removeAttribute('aria-current'));
                 link.classList.add('active');
+                link.setAttribute('aria-current', 'page');
             }
         });
     });
     
     // Update active link on scroll
-    window.addEventListener('scroll', () => {
+    const updateActiveNavOnScroll = () => {
         let current = '';
+        let nearestSectionDistance = Number.MAX_VALUE;
         
         sections.forEach(section => {
             const sectionTop = section.offsetTop;
             const sectionHeight = section.offsetHeight;
             const scrollPosition = window.pageYOffset;
             
-            if (scrollPosition >= sectionTop - 200) {
+            // Calculate distance from current scroll position to the middle of each section
+            const distance = Math.abs(scrollPosition + window.innerHeight/2 - (sectionTop + sectionHeight/2));
+            
+            // Find the nearest section
+            if (distance < nearestSectionDistance) {
+                nearestSectionDistance = distance;
                 current = section.getAttribute('id');
             }
         });
         
-        navLinks.forEach(link => {
-            link.classList.remove('active');
-            if (link.getAttribute('href') === `#${current}`) {
-                link.classList.add('active');
-            }
-        });
-    });
+        // Update active navigation link
+        if (current) {
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                link.removeAttribute('aria-current');
+                
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.classList.add('active');
+                    link.setAttribute('aria-current', 'page');
+                }
+            });
+        }
+    };
+    
+    // Run on scroll with debounce to improve performance
+    window.addEventListener('scroll', debounce(updateActiveNavOnScroll, 100));
+    
+    // Initial check for active section
+    updateActiveNavOnScroll();
     
     // Initialize neural network sphere
     initNeuralSphere();
