@@ -90,13 +90,13 @@
             <div class="container">
                 <h2 class="section-title">About Me</h2>
                 <div class="about-content">
-                    <div class="about-text">
+                    <div class="about-text slide-right">
                         <p>I'm a Computer Science and Artificial Intelligence student with a strong background in software development, robotics, and leadership. My passion lies in creating innovative solutions that leverage cutting-edge technology to solve real-world problems.</p>
                         <p>With experience in full-stack development, AI integration, and robotics engineering, I've led projects from concept to deployment, consistently delivering high-quality results that exceed expectations.</p>
                         <p>When I'm not coding, you can find me playing competitive football or the piano, activities that help me maintain a creative and balanced perspective.</p>
                         <p class="find-fours">Can you find the 4s in my journey?</p>
                     </div>
-                    <div class="about-stats">
+                    <div class="about-stats slide-left">
                         <div class="stat-item" id="years-coding" data-sound="typing" data-value="4" style="cursor: pointer;" onclick="document.getElementById('mini-game-modal').classList.add('active'); console.log('Years Coding clicked via HTML'); if (typeof loadMiniGameLevel === 'function') { loadMiniGameLevel(1); }">
                             <div class="stat-circle">
                                 <span class="stat-number">?</span>
@@ -150,7 +150,7 @@
                     </svg>
                     
                     <div class="timeline">
-                        <div class="timeline-item" data-year="2024">
+                        <div class="timeline-item slide-up" data-year="2024">
                             <div class="timeline-icon">
                                 <i class="fas fa-code"></i>
                             </div>
@@ -172,7 +172,7 @@
                             </div>
                         </div>
                         
-                        <div class="timeline-item" data-year="2024">
+                        <div class="timeline-item slide-up" data-year="2024">
                             <div class="timeline-icon">
                                 <i class="fas fa-robot"></i>
                             </div>
@@ -194,7 +194,7 @@
                             </div>
                         </div>
                         
-                        <div class="timeline-item" data-year="2024">
+                        <div class="timeline-item slide-up" data-year="2024">
                             <div class="timeline-icon">
                                 <i class="fas fa-laptop-code"></i>
                             </div>
@@ -216,7 +216,7 @@
                             </div>
                         </div>
                         
-                        <div class="timeline-item" data-year="2023">
+                        <div class="timeline-item slide-up" data-year="2023">
                             <div class="timeline-icon">
                                 <i class="fas fa-globe"></i>
                             </div>
@@ -754,7 +754,13 @@
         </div>
     </div>
 
-    <script src="src/main.js"></script>
+    <!-- Theme toggle button -->
+    <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode">
+        <i class="fas fa-moon"></i>
+    </button>
+
+    <!-- Main JavaScript -->
+    <script src="./src/main.js"></script>
     <script>
         // Fallback script to ensure loading spinner disappears
         document.addEventListener('DOMContentLoaded', function() {
